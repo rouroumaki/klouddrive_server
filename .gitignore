@@ -170,3 +170,5 @@ core/js/mimetypelist.js
 # Tests - cypress
 cypress/snapshots
 cypress/videos
+
+/3rdparty
