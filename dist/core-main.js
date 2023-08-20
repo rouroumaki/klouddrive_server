@@ -6491,6 +6491,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_MainMenu_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/MainMenu.js */ "./core/src/components/MainMenu.js");
 /* harmony import */ var _components_UserMenu_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/UserMenu.js */ "./core/src/components/UserMenu.js");
 /* harmony import */ var _OC_password_confirmation_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./OC/password-confirmation.js */ "./core/src/OC/password-confirmation.js");
+/* harmony import */ var _utils_xhr_request_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./utils/xhr-request.js */ "./core/src/utils/xhr-request.js");
 /**
  * @copyright 2019 Christoph Wurst <christoph@winzerhof-wurst.at>
  *
@@ -6518,6 +6519,7 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 /* globals Snap */
+
 
 
 
@@ -6569,6 +6571,7 @@ moment__WEBPACK_IMPORTED_MODULE_2___default().locale(locale);
  * Initializes core
  */
 var initCore = function initCore() {
+  (0,_utils_xhr_request_js__WEBPACK_IMPORTED_MODULE_9__.interceptRequests)();
   jquery__WEBPACK_IMPORTED_MODULE_1___default()(window).on('unload.main', function () {
     _OC_index_js__WEBPACK_IMPORTED_MODULE_4__["default"]._unloadCalled = true;
   });
@@ -8463,6 +8466,72 @@ var initSessionHeartBeat = function initSessionHeartBeat() {
     clearInterval(interval);
     console.info('session heartbeat polling stopped');
   });
+};
+
+/***/ }),
+
+/***/ "./core/src/utils/xhr-request.js":
+/*!***************************************!*\
+  !*** ./core/src/utils/xhr-request.js ***!
+  \***************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   interceptRequests: function() { return /* binding */ interceptRequests; }
+/* harmony export */ });
+/*
+ * @copyright Copyright (c) 2023 Julius Härtl <jus@bitgrid.net>
+ *
+ * @author Julius Härtl <jus@bitgrid.net>
+ *
+ * @license GNU AGPL version 3 or any later version
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Intercept XMLHttpRequest and fetch API calls to add X-Requested-With header
+ *
+ * This is also done in @nextcloud/axios but not all requests pass through that
+ */
+var interceptRequests = function interceptRequests() {
+  XMLHttpRequest.prototype.open = function (open) {
+    return function (method, url, async) {
+      open.apply(this, arguments);
+      if (!this.getResponseHeader('X-Requested-With')) {
+        this.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      }
+    };
+  }(XMLHttpRequest.prototype.open);
+  window.fetch = function (fetch) {
+    return function (input, init) {
+      if (!init) {
+        init = {};
+      }
+      if (!init.headers) {
+        init.headers = new Headers();
+      }
+      if (init.headers instanceof Headers && !init.headers.has('X-Requested-With')) {
+        init.headers.append('X-Requested-With', 'XMLHttpRequest');
+      } else if (init.headers instanceof Object && !init.headers['X-Requested-With']) {
+        init.headers['X-Requested-With'] = 'XMLHttpRequest';
+      }
+      return fetch(input, init);
+    };
+  }(window.fetch);
 };
 
 /***/ }),
@@ -59139,4 +59208,4 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=core-main.js.map?v=202b2b73ba0bc705abc7
+//# sourceMappingURL=core-main.js.map?v=ae5595a37a6a6bad2f6a

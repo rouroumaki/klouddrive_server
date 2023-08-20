@@ -5671,7 +5671,7 @@ module.exports = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5v
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "-" + chunkId + ".js?v=" + {"node_modules_nextcloud_vue_dist_Components_NcContent_js-node_modules_nextcloud_vue_dist_Compo-d75b4a":"5fb2c005e34148bfdc4e","settings-users":"abe2c23c3343e32a234c","settings-apps-view":"63f6fca06e7d4ef1e5c4"}[chunkId] + "";
+/******/ 			return "" + chunkId + "-" + chunkId + ".js?v=" + {"node_modules_nextcloud_vue_dist_Components_NcContent_js-node_modules_nextcloud_vue_dist_Compo-d75b4a":"5fb2c005e34148bfdc4e","settings-users":"abe2c23c3343e32a234c","settings-apps-view":"f0b9bd047f6178b411ab"}[chunkId] + "";
 /******/ 		};
 /******/ 	}();
 /******/ 	
@@ -5888,4 +5888,4 @@ module.exports = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5v
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=settings-vue-settings-apps-users-management.js.map?v=5ad426eb7f427860952e
+//# sourceMappingURL=settings-vue-settings-apps-users-management.js.map?v=031989b08ac3efc85ea1

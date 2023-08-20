@@ -169,7 +169,7 @@ var getReminder = /*#__PURE__*/function () {
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_1__.generateOcsUrl)('/apps/files_reminders/api/v1/get/{fileId}', {
+          url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_1__.generateOcsUrl)('/apps/files_reminders/api/v1/{fileId}', {
             fileId: fileId
           });
           _context.next = 3;
@@ -196,7 +196,7 @@ var setReminder = /*#__PURE__*/function () {
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
-          url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_1__.generateOcsUrl)('/apps/files_reminders/api/v1/set/{fileId}', {
+          url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_1__.generateOcsUrl)('/apps/files_reminders/api/v1/{fileId}', {
             fileId: fileId
           });
           _context2.next = 3;
@@ -222,7 +222,7 @@ var clearReminder = /*#__PURE__*/function () {
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) switch (_context3.prev = _context3.next) {
         case 0:
-          url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_1__.generateOcsUrl)('/apps/files_reminders/api/v1/remove/{fileId}', {
+          url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_1__.generateOcsUrl)('/apps/files_reminders/api/v1/{fileId}', {
             fileId: fileId
           });
           _context3.next = 3;
@@ -1759,4 +1759,4 @@ render._withStripped = true
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=files_reminders-main.js.map?v=a46fa5078dfef43edf26
+//# sourceMappingURL=files_reminders-main.js.map?v=33d75b1e0b211c3e2553
