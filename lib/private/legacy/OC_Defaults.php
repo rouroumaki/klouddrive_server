@@ -59,10 +59,10 @@ class OC_Defaults {
 	public function __construct() {
 		$config = \OC::$server->getConfig();
 
-		$this->defaultEntity = 'Nextcloud'; /* e.g. company name, used for footers and copyright notices */
-		$this->defaultName = 'Nextcloud'; /* short name, used when referring to the software */
-		$this->defaultTitle = 'Nextcloud'; /* can be a longer name, for titles */
-		$this->defaultBaseUrl = 'https://nextcloud.com';
+		$this->defaultEntity = 'Kloud Drive'; /* e.g. company name, used for footers and copyright notices */
+		$this->defaultName = 'Kloud Drive'; /* short name, used when referring to the software */
+		$this->defaultTitle = 'Kloud Drive'; /* can be a longer name, for titles */
+		$this->defaultBaseUrl = 'https://drive.kloud.cn/klouddrive';
 		$this->defaultSyncClientUrl = $config->getSystemValue('customclient_desktop', 'https://nextcloud.com/install/#install-clients');
 		$this->defaultiOSClientUrl = $config->getSystemValue('customclient_ios', 'https://geo.itunes.apple.com/us/app/nextcloud/id1125420102?mt=8');
 		$this->defaultiTunesAppId = $config->getSystemValue('customclient_ios_appid', '1125420102');
@@ -72,7 +72,7 @@ class OC_Defaults {
 		$this->defaultDocVersion = \OC_Util::getVersion()[0]; // used to generate doc links
 		$this->defaultColorPrimary = '#0082c9';
 		$this->defaultTextColorPrimary = '#ffffff';
-		$this->defaultProductName = 'Nextcloud';
+		$this->defaultProductName = 'Kloud Drive';
 
 		$themePath = OC::$SERVERROOT . '/themes/' . OC_Util::getTheme() . '/defaults.php';
 		if (file_exists($themePath)) {

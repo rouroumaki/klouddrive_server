@@ -53,6 +53,18 @@
 				<div style="clear: both;" />
 			</div>
 			<h2 class="login-form__headline" data-login-form-headline v-html="headline" />
+			<NcTextField id="company"
+				ref="company"
+				label="company"
+				:label-visible="true"
+				name="company"
+				:value.sync="company"
+				:class="{shake: invalidPassword}"
+				autocapitalize="none"
+				:spellchecking="false"
+				:autocomplete="autoCompleteAllowed ? 'company' : 'off'"
+				data-login-form-input-company />
+							
 			<NcTextField id="user"
 				ref="user"
 				:label="t('core', 'Account name or email')"
@@ -163,6 +175,7 @@ export default {
 			headline: t('core', 'Log in to {productName}', { productName: OC.theme.name }),
 			user: '',
 			password: '',
+			company:''
 		}
 	},
 
@@ -204,6 +217,8 @@ export default {
 	},
 
 	mounted() {
+		console.log(OC);
+		debugger
 		if (this.username === '') {
 			this.$refs.user.$refs.inputField.$refs.input.focus()
 		} else {
