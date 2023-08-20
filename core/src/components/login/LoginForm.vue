@@ -217,8 +217,6 @@ export default {
 	},
 
 	mounted() {
-		console.log(OC);
-		debugger
 		if (this.username === '') {
 			this.$refs.user.$refs.inputField.$refs.input.focus()
 		} else {
