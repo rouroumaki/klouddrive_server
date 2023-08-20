@@ -172,3 +172,5 @@ cypress/snapshots
 cypress/videos
 
 /3rdparty
+
+/dist/
