@@ -31,6 +31,7 @@ import { setPageHeading } from '../../../core/src/OCP/accessibility.js'
 
 // Dynamic loading
 const Users = () => import(/* webpackChunkName: 'settings-users' */'./views/Users.vue')
+const Companies = () => import(/* webpackChunkName: 'settings-users' */'./views/Companies.vue')
 const Apps = () => import(/* webpackChunkName: 'settings-apps-view' */'./views/Apps.vue')
 
 Vue.use(Router)
@@ -52,8 +53,37 @@ const router = new Router({
 	linkActiveClass: 'active',
 	routes: [
 		{
-			path: '/:index(index.php/)?settings/users',
+			path: '/:index(index.php/)?settings/companies',
 			component: Users,
+			props: true,
+			name: 'users',
+			meta: {
+				title: () => {
+					return t('settings', 'Active users')
+				},
+			},
+			children: [
+				{
+					path: ':selectedGroup',
+					name: 'group',
+					meta: {
+						title: (to) => {
+							if (to.params.selectedGroup === 'admin') {
+								return t('settings', 'Admins')
+							}
+							if (to.params.selectedGroup === 'disabled') {
+								return t('settings', 'Disabled users')
+							}
+							return decodeURIComponent(to.params.selectedGroup)
+						},
+					},
+					component: Users,
+				},
+			],
+		},
+		{
+			path: '/:index(index.php/)?settings/users',
+			component: Companies,
 			props: true,
 			name: 'users',
 			meta: {

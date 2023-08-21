@@ -70,6 +70,10 @@ export default {
 	},
 
 	mounted() {
+		this.$set(this.settingsNavEntries.core_users, 'name', '公司')
+		// this.$set(this.settingsNavEntries.core_users, 'href', '/index.php/settings/companies')
+		// console.log(this.settingsNavEntries);
+		// debugger
 		emit('core:user-menu:mounted')
 	},
 }

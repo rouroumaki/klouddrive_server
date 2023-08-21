@@ -67,6 +67,7 @@ const state = {
 		showUserBackend: false,
 		showLastLogin: false,
 		showNewUserForm: false,
+		showNewCompanyForm: false,
 		showLanguages: false,
 	},
 }
