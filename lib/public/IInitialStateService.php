@@ -49,7 +49,7 @@ interface IInitialStateService {
 	 * @see \OCP\AppFramework\Services\IInitialState::provideInitialState()
 	 */
 	public function provideInitialState(string $appName, string $key, $data): void;
-
+	
 	/**
 	 * Allows an app to provide its initial state via a lazy method.
 	 * This will call the closure when the template is being generated.

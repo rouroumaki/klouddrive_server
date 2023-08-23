@@ -490,6 +490,16 @@ class Server extends ServerContainer implements IServerContainer {
 		/** @deprecated 19.0.0 */
 		$this->registerDeprecatedAlias('GroupManager', \OCP\IGroupManager::class);
 
+		$this->registerService(\OCP\ICompanyManager::class, function(ContainerInterface $c){
+			$companyManager = new \OC\Company\Manager(
+				$this->get(IUserManager::class),
+				$this->get(IEventDispatcher::class),
+				$this->get(LoggerInterface::class),
+				$this->get(ICacheFactory::class)
+			);
+			return $companyManager;
+		});
+
 		$this->registerService(Store::class, function (ContainerInterface $c) {
 			$session = $c->get(ISession::class);
 			if (\OC::$server->get(SystemConfig::class)->getValue('installed', false)) {

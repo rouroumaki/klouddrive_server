@@ -137,6 +137,7 @@ class Group implements IGroup {
 				$backend->usersInGroup($this->gid),
 				$userIds
 			);
+			
 			if ($diff) {
 				$userIds = array_merge($userIds, $diff);
 			}

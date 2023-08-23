@@ -58,6 +58,9 @@ $application->registerRoutes($this, [
 		['name' => 'login#confirmPassword', 'url' => '/login/confirm', 'verb' => 'POST'],
 		['name' => 'login#showLoginForm', 'url' => '/login', 'verb' => 'GET'],
 		['name' => 'login#logout', 'url' => '/logout', 'verb' => 'GET'],
+		['name' => 'company#create', 'url' => '/company/create', 'verb' => 'POST'],
+		['name' => 'company#addUser', 'url' => '/company/adduser', 'verb' => 'POST'],
+		['name' => 'company#search', 'url' => '/companylist', 'verb' => 'GET'],
 
 		// Original login flow used by all clients
 		['name' => 'ClientFlowLogin#showAuthPickerPage', 'url' => '/login/flow', 'verb' => 'GET'],
