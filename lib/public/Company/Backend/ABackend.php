@@ -12,7 +12,7 @@ abstract class ABackend implements CompanyInterface {
 		$implements = 0;
 
 		if ($this instanceof IAddToCompanyBackend) {
-			$implements |= CompanyInterface::ADD_TO_Company;
+			$implements |= CompanyInterface::ADD_TO_COMPANY;
 		}
 		if ($this instanceof ICountUsersBackend) {
 			$implements |= CompanyInterface::COUNT_USERS;

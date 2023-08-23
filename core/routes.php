@@ -60,6 +60,7 @@ $application->registerRoutes($this, [
 		['name' => 'login#logout', 'url' => '/logout', 'verb' => 'GET'],
 		['name' => 'company#create', 'url' => '/company/create', 'verb' => 'POST'],
 		['name' => 'company#addUser', 'url' => '/company/adduser', 'verb' => 'POST'],
+		['name' => 'company#removeUser', 'url' => '/company/removeuser', 'verb' => 'POST'],
 		['name' => 'company#search', 'url' => '/companylist', 'verb' => 'GET'],
 
 		// Original login flow used by all clients

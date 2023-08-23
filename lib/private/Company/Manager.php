@@ -108,7 +108,7 @@ class Manager extends PublicEmitter implements ICompanyManager {
 		if (count($backends) === 0) {
 			return null;
 		}
-		$this->cachedCompanies[$cid] = new Company($cid, $backends, $this->dispatcher, $this->userManager, $this, $displayName);
+  		$this->cachedCompanies[$cid] = new Company($cid, $backends, $this->dispatcher, $this->userManager, $this, $displayName);
 		return $this->cachedCompanies[$cid];
 	}
 
@@ -124,7 +124,7 @@ class Manager extends PublicEmitter implements ICompanyManager {
 		} else {
 			foreach ($this->backends as $backend) {
 				if ($backend->implementsActions(Backend::CREATE_COMPANY)) {
-					if ($backend->createCompany($cid)) {
+					if ($backend->createCompany($cid, $name)) {
 						$company = $this->getCompanyObject($cid);
 						$this->dispatcher->dispatchTyped(new CompanyCreatedEvent($company));
 						$this->emit('\OC\Company', 'postCreate', [$company]);

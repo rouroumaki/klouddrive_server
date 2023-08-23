@@ -98,7 +98,7 @@ class Company implements ICompany {
 			return true;
 		}
 		foreach ($this->backends as $backend) {
-			if ($backend->inGroup($user->getUID(), $this->cid)) {
+			if ($backend->inCompany($user->getUID(), $this->cid)) {
 				$this->users[$user->getUID()] = $user;
 				return true;
 			}
@@ -126,7 +126,7 @@ class Company implements ICompany {
 	public function removeUser($user) {
 		$result = false;
 		foreach ($this->backends as $backend) {
-			if ($backend->implementsActions(\OC\Company\Backend::REMOVE_FROM_COMPANY) and $backend->inGroup($user->getUID(), $this->cid)) {
+			if ($backend->implementsActions(\OC\Company\Backend::REMOVE_FROM_COMPANY) and $backend->inCompany($user->getUID(), $this->cid)) {
 				$backend->removeFromCompany($user->getUID(), $this->cid);
 				$result = true;
 			}

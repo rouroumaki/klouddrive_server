@@ -33,7 +33,7 @@ class CompanyController extends Controller {
 	 * @return JSONResponse<Http::STATUS_OK, array{}>
 
 	 */
-    public function create(string $cid, string $displayname, string $pwd): JSONResponse
+    public function create(string $cid, string $displayname, string $pwd=''): JSONResponse
     {
 		try{
 			$company = $this->companyManager->createCompany($cid, $displayname);
@@ -59,7 +59,7 @@ class CompanyController extends Controller {
 	 * @NoCSRFRequired
 	 * @NoSameSiteCookieRequired
 	 * 
-	 * create a company
+	 * add a user to a company
 	 * 
 	 * @return JSONResponse<Http::STATUS_OK, array{}>
 
@@ -79,6 +79,37 @@ class CompanyController extends Controller {
 				]], Http::STATUS_BAD_REQUEST);
 			}
 			$company->addUser($user);
+			return new JSONResponse();
+		}
+		catch(\Exception $e){
+			return new JSONResponse(['data' => ['message' => $this->l10n->t('An error occurred. '). $e->getMessage()]], Http::STATUS_BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoSameSiteCookieRequired
+	 * 
+	 * remove a user from a company
+	 * 
+	 * @return JSONResponse<Http::STATUS_OK, array{}>
+
+	 */
+	public function removeUser(string $cid, string $uid): JSONResponse{
+		try{
+			$company = $this->companyManager->get($cid);
+			$user = $this->userManager->get($uid);
+			if ($company === null){
+				return new JSONResponse(['data' => [
+					'message' => $this->l10n->t('Not found the company( '). $cid . ').'
+				]], Http::STATUS_BAD_REQUEST);
+			}
+			if ($user === null){
+				return new JSONResponse(['data' => [
+					'message' => $this->l10n->t('Not found the user ('). $uid . ').'
+				]], Http::STATUS_BAD_REQUEST);
+			}
+			$company->removeUser($user);
 			return new JSONResponse();
 		}
 		catch(\Exception $e){
