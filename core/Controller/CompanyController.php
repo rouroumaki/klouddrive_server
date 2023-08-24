@@ -5,6 +5,7 @@ namespace OC\Core\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\ICompanyManager;
@@ -143,5 +144,18 @@ class CompanyController extends Controller {
 		catch(\Exception $e){
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('An error occurred. '). $e->getMessage()]], Http::STATUS_BAD_REQUEST);
 		}
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoSameSiteCookieRequired
+	 * 
+	 * companyList
+	 * 
+	 * @return TemplateResponse
+
+	 */
+	public function companyList(){
+		return new TemplateResponse('settings', 'settings-vue', ['serverData' => [], 'pageTitle' => $this->l10n->t('Users')]);
 	}
 }
