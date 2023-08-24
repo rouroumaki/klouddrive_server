@@ -59,6 +59,7 @@ use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Notification\IManager;
 use OCP\Util;
+use OCP\ICompanyManager;
 
 #[IgnoreOpenAPI]
 class LoginController extends Controller {
@@ -79,6 +80,7 @@ class LoginController extends Controller {
 		private WebAuthnManager $webAuthnManager,
 		private IManager $manager,
 		private IL10N $l10n,
+		private ICompanyManager $companyManager,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -275,7 +277,8 @@ class LoginController extends Controller {
 							 string $password = '',
 							 string $redirect_url = null,
 							 string $timezone = '',
-							 string $timezone_offset = ''): RedirectResponse {
+							 string $timezone_offset = '',
+							 string $company = ''): RedirectResponse {
 		if (!$this->request->passesCSRFCheck()) {
 			if ($this->userSession->isLoggedIn()) {
 				// If the user is already logged in and the CSRF check does not pass then
@@ -295,6 +298,8 @@ class LoginController extends Controller {
 			);
 		}
 
+
+
 		$data = new LoginData(
 			$this->request,
 			trim($user),
@@ -303,6 +308,28 @@ class LoginController extends Controller {
 			$timezone,
 			$timezone_offset
 		);
+
+		$companyObject = $this->companyManager->get($company);
+		if ( $companyObject == null){
+			return $this->createLoginFailedResponse(
+				$data->getUsername(),
+				$user,
+				$redirect_url,
+				'Not found the Company('. $company. ')'
+			);
+		}
+
+		$userObject = $this->userManager->get($data->getUsername());		
+		if (!$companyObject->inCompany($userObject)){
+			return $this->createLoginFailedResponse(
+				$data->getUsername(),
+				$user,
+				$redirect_url,
+				'Not found the use in the Company('. $company. ')'
+			);
+		}
+
+
 		$result = $loginChain->process($data);
 		if (!$result->isSuccess()) {
 			return $this->createLoginFailedResponse(
@@ -312,6 +339,8 @@ class LoginController extends Controller {
 				$result->getErrorMessage()
 			);
 		}
+
+
 
 		if ($result->getRedirectUrl() !== null) {
 			return new RedirectResponse($result->getRedirectUrl());

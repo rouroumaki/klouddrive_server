@@ -60,6 +60,33 @@ class CompanyController extends Controller {
 	 * @NoCSRFRequired
 	 * @NoSameSiteCookieRequired
 	 * 
+	 * delete a company
+	 * 
+	 * @return JSONResponse<Http::STATUS_OK, array{}>
+
+	 */
+	public function delete(string $cid):JSONResponse{
+		try{
+			$company = $this->companyManager->get($cid);
+			if ($company === null){
+				return new JSONResponse(['data' => [
+					'message' => $this->l10n->t('Not found the company( '). $cid . ').'
+				]], Http::STATUS_BAD_REQUEST);
+			}
+
+			$company->delete();
+			return new JSONResponse();
+		}
+		catch (\Exception $e) {
+			$this->logger->error($e->getMessage(), ['exception' => $e]);
+			return new JSONResponse(['data' => ['message' => $this->l10n->t('An error occurred. '). $e->getMessage()]], Http::STATUS_OK);
+		}
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoSameSiteCookieRequired
+	 * 
 	 * add a user to a company
 	 * 
 	 * @return JSONResponse<Http::STATUS_OK, array{}>
@@ -118,6 +145,23 @@ class CompanyController extends Controller {
 		}
 	}
 
+	public function members(string $cid, ?int $pageno=0, ?int $pagesize=null):JSONResponse{
+		try{
+			$company = $this->companyManager->get($cid);
+			
+			if ($company === null){
+				return new JSONResponse(['data' => [
+					'message' => $this->l10n->t('Not found the company( '). $cid . ').'
+				]], Http::STATUS_BAD_REQUEST);
+			}
+			$company->getUsers();
+			return new JSONResponse();
+		}
+		catch(\Exception $e){
+			return new JSONResponse(['data' => ['message' => $this->l10n->t('An error occurred. '). $e->getMessage()]], Http::STATUS_BAD_REQUEST);
+		}
+	}
+
 
 	/**
 	 * @NoCSRFRequired
@@ -139,7 +183,10 @@ class CompanyController extends Controller {
 
 		try{
 			$companies = $this->companyManager->search($search, $limit, $offset);
-			return new JSONResponse(['data' => $companies]);
+			$data = array_map(function($item){
+				return ['cid'=> $item->getCID(), 'display'=> $item->getDisplayname()];
+			}, $companies);
+			return new JSONResponse(['data' => $data]);
 		}
 		catch(\Exception $e){
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('An error occurred. '). $e->getMessage()]], Http::STATUS_BAD_REQUEST);
