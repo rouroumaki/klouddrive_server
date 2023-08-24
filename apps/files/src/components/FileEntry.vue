@@ -170,8 +170,8 @@ import { CancelablePromise } from 'cancelable-promise'
 import { debounce } from 'debounce'
 import { emit } from '@nextcloud/event-bus'
 import { extname } from 'path'
-import { formatFileSize, Permission } from '@nextcloud/files'
 import { generateUrl } from '@nextcloud/router'
+import { getFileActions, DefaultType, FileType, formatFileSize, Permission } from '@nextcloud/files'
 import { showError, showSuccess } from '@nextcloud/dialogs'
 import { translate } from '@nextcloud/l10n'
 import { vOnClickOutside } from '@vueuse/components'
@@ -187,7 +187,6 @@ import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import Vue from 'vue'
 
 import { ACTION_DETAILS } from '../actions/sidebarAction.ts'
-import { getFileActions, DefaultType } from '../services/FileAction.ts'
 import { hashCode } from '../utils/hashUtils.ts'
 import { isCachedPreview } from '../services/PreviewService.ts'
 import { useActionsMenuStore } from '../store/actionsmenu.ts'
@@ -395,6 +394,10 @@ export default Vue.extend({
 			return this.userConfig.crop_image_previews
 		},
 		previewUrl() {
+			if (this.source.type === FileType.Folder) {
+				return null
+			}
+
 			try {
 				const previewUrl = this.source.attributes.previewUrl
 					|| generateUrl('/core/preview?fileId={fileid}', {
