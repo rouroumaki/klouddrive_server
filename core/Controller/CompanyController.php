@@ -203,6 +203,323 @@ class CompanyController extends Controller {
 
 	 */
 	public function companyList(){
-		return new TemplateResponse('settings', 'settings-vue', ['serverData' => [], 'pageTitle' => $this->l10n->t('Users')]);
+		$jsonData = '{
+			"groups": [
+				{
+					"id": "admin",
+					"name": "admin",
+					"usercount": 2,
+					"disabled": 0,
+					"canAdd": true,
+					"canRemove": true
+				},
+				{
+					"id": "disabled",
+					"name": "Disabled users",
+					"usercount": 0
+				}
+			],
+			"isAdmin": true,
+			"sortGroups": 1,
+			"quotaPreset": [
+				"1 GB",
+				"5 GB",
+				"10 GB"
+			],
+			"allowUnlimitedQuota": true,
+			"userCount": 2,
+			"languages": {
+				"commonLanguages": [
+					{
+						"code": "en",
+						"name": "English (US)"
+					},
+					{
+						"code": "es",
+						"name": "Español (España)"
+					},
+					{
+						"code": "fr",
+						"name": "Français"
+					},
+					{
+						"code": "de",
+						"name": "Deutsch (Persönlich: Du)"
+					},
+					{
+						"code": "de_DE",
+						"name": "Deutsch (Förmlich: Sie)"
+					},
+					{
+						"code": "ja",
+						"name": "Japanese (日本語)"
+					},
+					{
+						"code": "ar",
+						"name": "اللغة العربية"
+					},
+					{
+						"code": "ru",
+						"name": "Русский"
+					},
+					{
+						"code": "nl",
+						"name": "Nederlands"
+					},
+					{
+						"code": "it",
+						"name": "Italiano"
+					},
+					{
+						"code": "pt_BR",
+						"name": "Português Brasileiro"
+					},
+					{
+						"code": "pt_PT",
+						"name": "Português"
+					},
+					{
+						"code": "da",
+						"name": "Dansk"
+					},
+					{
+						"code": "sv",
+						"name": "Svenska"
+					},
+					{
+						"code": "tr",
+						"name": "Türkçe"
+					},
+					{
+						"code": "zh_CN",
+						"name": "简体中文"
+					},
+					{
+						"code": "ko",
+						"name": "한국어"
+					}
+				],
+				"otherLanguages": [
+					{
+						"code": "id",
+						"name": "Bahasa Indonesia"
+					},
+					{
+						"code": "br",
+						"name": "Brezhoneg"
+					},
+					{
+						"code": "ca",
+						"name": "Català"
+					},
+					{
+						"code": "et_EE",
+						"name": "Eesti"
+					},
+					{
+						"code": "en_GB",
+						"name": "English (British English)"
+					},
+					{
+						"code": "es_AR",
+						"name": "Español (Argentina)"
+					},
+					{
+						"code": "es_CL",
+						"name": "Español (Chile)"
+					},
+					{
+						"code": "es_CO",
+						"name": "Español (Colombia)"
+					},
+					{
+						"code": "es_CR",
+						"name": "Español (Costa Rica)"
+					},
+					{
+						"code": "es_DO",
+						"name": "Español (Dominican Republic)"
+					},
+					{
+						"code": "es_EC",
+						"name": "Español (Ecuador)"
+					},
+					{
+						"code": "es_SV",
+						"name": "Español (El Salvador)"
+					},
+					{
+						"code": "es_GT",
+						"name": "Español (Guatemala)"
+					},
+					{
+						"code": "es_HN",
+						"name": "Español (Honduras)"
+					},
+					{
+						"code": "es_419",
+						"name": "Español (Latin America)"
+					},
+					{
+						"code": "es_MX",
+						"name": "Español (México)"
+					},
+					{
+						"code": "es_NI",
+						"name": "Español (Nicaragua)"
+					},
+					{
+						"code": "es_PA",
+						"name": "Español (Panama)"
+					},
+					{
+						"code": "es_PY",
+						"name": "Español (Paraguay)"
+					},
+					{
+						"code": "es_PE",
+						"name": "Español (Peru)"
+					},
+					{
+						"code": "es_PR",
+						"name": "Español (Puerto Rico)"
+					},
+					{
+						"code": "es_UY",
+						"name": "Español (Uruguay)"
+					},
+					{
+						"code": "eo",
+						"name": "Esperanto"
+					},
+					{
+						"code": "eu",
+						"name": "Euskara"
+					},
+					{
+						"code": "gl",
+						"name": "Galego"
+					},
+					{
+						"code": "hr",
+						"name": "Hrvatski"
+					},
+					{
+						"code": "lv",
+						"name": "Latviešu"
+					},
+					{
+						"code": "lt_LT",
+						"name": "Lietuvių"
+					},
+					{
+						"code": "hu",
+						"name": "Magyar"
+					},
+					{
+						"code": "nb",
+						"name": "Norsk bokmål"
+					},
+					{
+						"code": "oc",
+						"name": "Occitan"
+					},
+					{
+						"code": "pl",
+						"name": "Polski"
+					},
+					{
+						"code": "ro",
+						"name": "Română"
+					},
+					{
+						"code": "sk",
+						"name": "Slovenčina"
+					},
+					{
+						"code": "sl",
+						"name": "Slovenščina"
+					},
+					{
+						"code": "vi",
+						"name": "Tiếng Việt"
+					},
+					{
+						"code": "sc",
+						"name": "sardu"
+					},
+					{
+						"code": "fi",
+						"name": "suomi"
+					},
+					{
+						"code": "is",
+						"name": "Íslenska"
+					},
+					{
+						"code": "cs",
+						"name": "Čeština"
+					},
+					{
+						"code": "el",
+						"name": "Ελληνικά"
+					},
+					{
+						"code": "bg",
+						"name": "Български"
+					},
+					{
+						"code": "mk",
+						"name": "Македонски"
+					},
+					{
+						"code": "sr",
+						"name": "Српски"
+					},
+					{
+						"code": "uk",
+						"name": "Українська"
+					},
+					{
+						"code": "he",
+						"name": "עברית"
+					},
+					{
+						"code": "fa",
+						"name": "فارسى"
+					},
+					{
+						"code": "th",
+						"name": "ภาษาไทย - Thai"
+					},
+					{
+						"code": "lo",
+						"name": "ຂີ້ຕົວະ"
+					},
+					{
+						"code": "ka_GE",
+						"name": "ქართული"
+					},
+					{
+						"code": "zh_TW",
+						"name": "正體中文（臺灣）"
+					},
+					{
+						"code": "zh_HK",
+						"name": "正體中文（香港）"
+					}
+				]
+			},
+			"defaultLanguage": "en",
+			"forceLanguage": false,
+			"defaultQuota": "none",
+			"canChangePassword": true,
+			"newUserGenerateUserID": false,
+			"newUserRequireEmail": false,
+			"newUserSendEmail": true
+		} ';
+		
+		$serverData = json_decode($jsonData, true);
+		return new TemplateResponse('settings', 'settings-vue', ['serverData' => $serverData, 'pageTitle' => $this->l10n->t('Users')]);
 	}
 }

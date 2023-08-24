@@ -28,16 +28,18 @@
 			data-test="form"
 			:disabled="loading.all"
 			@submit.prevent="createUser">
-			<h2>新建公司</h2>
+			<h2>{{ t('settings', 'New user') }}</h2>
 			<NcTextField ref="username"
 				class="modal__item"
 				data-test="username"
 				:value.sync="newUser.id"
-				label="公司名（必填）"
+				:disabled="settings.newUserGenerateUserID"
+				:label="usernameLabel"
 				:label-visible="true"
 				autocapitalize="none"
 				autocomplete="off"
 				autocorrect="off"
+				pattern="[a-zA-Z0-9 _\.@\-']+"
 				required />
 			<NcTextField class="modal__item"
 				data-test="displayName"
@@ -47,6 +49,11 @@
 				autocapitalize="none"
 				autocomplete="off"
 				autocorrect="off" />
+			<span v-if="!settings.newUserRequireEmail"
+				id="password-email-hint"
+				class="modal__hint">
+				{{ t('settings', 'Either password or email is required') }}
+			</span>
 			<NcPasswordField ref="password"
 				class="modal__item"
 				data-test="password"
@@ -60,6 +67,45 @@
 				autocomplete="new-password"
 				autocorrect="off"
 				:required="newUser.mailAddress === ''" />
+			<NcTextField class="modal__item"
+				data-test="email"
+				type="email"
+				:value.sync="newUser.mailAddress"
+				aria-describedby="password-email-hint"
+				:label="newUser.password === '' || settings.newUserRequireEmail ? t('settings', 'Email (required)') : t('settings', 'Email')"
+				:label-visible="true"
+				autocapitalize="none"
+				autocomplete="off"
+				autocorrect="off"
+				:required="newUser.password === '' || settings.newUserRequireEmail" />
+			<div class="modal__item">
+				<!-- hidden input trick for vanilla html5 form validation -->
+				<NcTextField v-if="!settings.isAdmin"
+					id="new-user-groups-input"
+					tabindex="-1"
+					:class="{ 'icon-loading-small': loading.groups }"
+					:value="newUser.groups"
+					:required="!settings.isAdmin" />
+				<label class="modal__label"
+					for="new-user-groups">
+					{{ !settings.isAdmin ? t('settings', 'Groups (required)') : t('settings', 'Groups') }}
+				</label>
+				<NcSelect class="modal__select"
+					input-id="new-user-groups"
+					:placeholder="t('settings', 'Set user groups')"
+					:disabled="loading.groups || loading.all"
+					:options="canAddGroups"
+					:value="newUser.groups"
+					label="name"
+					:close-on-select="false"
+					:multiple="true"
+					:taggable="true"
+					@input="handleGroupInput"
+					@option:created="createGroup" />
+					<!-- If user is not admin, he is a subadmin.
+						Subadmins can't create users outside their groups
+						Therefore, empty select is forbidden -->
+			</div>
 			<div v-if="subAdminsGroups.length > 0 && settings.isAdmin"
 				class="modal__item">
 				<label class="modal__label"
@@ -124,7 +170,7 @@
 				data-test="submit"
 				type="primary"
 				native-type="submit">
-				添加新公司
+				{{ t('settings', 'Add new user') }}
 			</NcButton>
 		</form>
 	</NcModal>
@@ -245,6 +291,9 @@ export default {
 					password: this.newUser.password,
 					displayName: this.newUser.displayName,
 					email: this.newUser.mailAddress,
+					groups: this.newUser.groups.map(group => group.id),
+					subadmin: this.newUser.subAdminsGroups.map(group => group.id),
+					quota: this.newUser.quota.id,
 					language: this.newUser.language.code,
 					manager: this.newUser.manager.id,
 				})

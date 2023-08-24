@@ -30,7 +30,7 @@ export default {
 	beforeMount() {
 		// importing server data into the store
 		const serverDataElmt = document.getElementById('serverData')
-		if (serverDataElmt !== null) {
+    if (serverDataElmt !== null) {
 			this.$store.commit('setServerData', JSON.parse(document.getElementById('serverData').dataset.server))
 		}
 	},

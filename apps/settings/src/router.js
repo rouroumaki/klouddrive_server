@@ -53,8 +53,8 @@ const router = new Router({
 	linkActiveClass: 'active',
 	routes: [
 		{
-			path: '/:index(index.php/)?settings/companies',
-			component: Users,
+			path: '/:index(index.php/)?/companies',
+			component: Companies,
 			props: true,
 			name: 'users',
 			meta: {
@@ -83,7 +83,7 @@ const router = new Router({
 		},
 		{
 			path: '/:index(index.php/)?settings/users',
-			component: Companies,
+			component: Users,
 			props: true,
 			name: 'users',
 			meta: {

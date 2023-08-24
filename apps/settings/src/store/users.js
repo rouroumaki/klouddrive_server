@@ -28,7 +28,7 @@
 
 import api from './api.js'
 import axios from '@nextcloud/axios'
-import { generateOcsUrl } from '@nextcloud/router'
+import { generateOcsUrl,generateUrl } from '@nextcloud/router'
 import logger from '../logger.js'
 
 const orderGroups = function(groups, orderBy) {
@@ -56,12 +56,16 @@ const defaults = {
 
 const state = {
 	users: [],
+	companies: [],
 	groups: [],
 	orderBy: 1,
 	minPasswordLength: 0,
 	usersOffset: 0,
 	usersLimit: 25,
 	userCount: 0,
+	companiesOffset: 0,
+	companiesLimit: 25,
+	companyCount: 0,
 	showConfig: {
 		showStoragePath: false,
 		showUserBackend: false,
@@ -73,6 +77,14 @@ const state = {
 }
 
 const mutations = {
+	appendCompanies(state, companiesObj) {
+		const existingCompanies = state.companies.map(({ cid }) => cid)
+		const newCompany = Object.values(companiesObj)
+			.filter(({ cid }) => !existingCompanies.includes(cid))
+		const companies = state.companies.concat(newCompany)
+		state.companiesOffset += state.companiesLimit
+		state.companies = companies
+	},
 	appendUsers(state, usersObj) {
 		const existingUsers = state.users.map(({ id }) => id)
 		const newUsers = Object.values(usersObj)
@@ -163,6 +175,11 @@ const mutations = {
 		state.users.unshift(user)
 		this.commit('updateUserCounts', { user, actionType: 'create' })
 	},
+	addCompanyData(state, response) {
+		const company = response.data.data
+		state.companies.unshift(company)
+		this.commit('updateCompanyCounts', { company, actionType: 'create' })
+	},
 	enableDisableUser(state, { userid, enabled }) {
 		const user = state.users.find(user => user.id === userid)
 		user.enabled = enabled
@@ -214,6 +231,19 @@ const mutations = {
 			// not throwing error to interrupt execution as this is not fatal
 		}
 	},
+	updateCompanyCounts(state, { company, actionType }) {
+		switch (actionType) {
+		case 'create':
+			state.companyCount++ // increment Active Users count
+			break
+		case 'remove':
+			state.companyCount--
+			break
+		default:
+			logger.error(`Unknown action type in updateCompanyCounts: '${actionType}'`)
+			// not throwing error to interrupt execution as this is not fatal
+		}
+	},
 	setUserData(state, { userid, key, value }) {
 		if (key === 'quota') {
 			const humanValue = OC.Util.computerFileSize(value)
@@ -242,6 +272,9 @@ const getters = {
 	getUsers(state) {
 		return state.users
 	},
+	getCompanies(state) {
+		return state.companies
+	},
 	getGroups(state) {
 		return state.groups
 	},
@@ -257,6 +290,12 @@ const getters = {
 	},
 	getUsersLimit(state) {
 		return state.usersLimit
+	},
+	getCompaniesOffset(state) {
+		return state.companiesOffset
+	},
+	getCompaniesLimit(state) {
+		return state.companiesLimit
 	},
 	getUserCount(state) {
 		return state.userCount
@@ -351,6 +390,28 @@ const actions = {
 					context.commit('appendUsers', response.data.ocs.data.users)
 				}
 				return usersCount
+			})
+			.catch((error) => {
+				if (!axios.isCancel(error)) {
+					context.commit('API_FAILURE', error)
+				}
+			})
+	},
+
+	getCompanies(context, { offset, limit, search }) {
+		if (searchRequestCancelSource) {
+			searchRequestCancelSource.cancel('Operation canceled by another search request.')
+		}
+		searchRequestCancelSource = CancelToken.source()
+		return api.get(generateUrl(`companylist?pageno=${offset}&pagesize=${limit}&search=${search}`), {
+			cancelToken: searchRequestCancelSource.token,
+		})
+			.then((response) => {
+				const companyCount = Object.keys(response.data.data).length
+				if (companyCount > 0) {
+					context.commit('appendCompanies', response.data.data)
+				}
+				return companyCount
 			})
 			.catch((error) => {
 				if (!axios.isCancel(error)) {
@@ -608,6 +669,17 @@ const actions = {
 		return api.requireAdmin().then((response) => {
 			return api.post(generateOcsUrl('cloud/users'), { userid, password, displayName, email, groups, subadmin, quota, language, manager })
 				.then((response) => dispatch('addUserData', userid || response.data.ocs.data.id))
+				.catch((error) => { throw error })
+		}).catch((error) => {
+			commit('API_FAILURE', { userid, error })
+			throw error
+		})
+	},
+
+	addCompany({ commit, dispatch }, { userid, password, displayName }) {
+		return api.requireAdmin().then((response) => {
+			return api.post(generateUrl('/company/create'), { cid:userid, password, displayName })
+				.then((response) => dispatch('addUserData', response.data.data))
 				.catch((error) => { throw error })
 		}).catch((error) => {
 			commit('API_FAILURE', { userid, error })

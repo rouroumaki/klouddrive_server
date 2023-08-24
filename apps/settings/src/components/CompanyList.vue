@@ -22,30 +22,39 @@
 
 <template>
 	<Fragment>
-		<NewCompanyModal v-if="showConfig.showNewCompanyForm"
+		<NewCompanyModal
+			v-if="showConfig.showNewCompanyForm"
 			:loading="loading"
 			:new-user="newUser"
-			:quota-options="quotaOptions"
 			@reset="resetForm"
-			@close="closeModal" />
-		<NcEmptyContent v-if="filteredUsers.length === 0"
+			@close="closeModal"
+		/>
+		<NcEmptyContent
+			v-if="filteredCompanies.length === 0"
 			class="empty"
-			:name="isInitialLoad && loading.users ? null : t('settings', 'No users')">
+			:name="
+				isInitialLoad && loading.companies
+					? null
+					: t('settings', 'No companies')
+			"
+		>
 			<template #icon>
-				<NcLoadingIcon v-if="isInitialLoad && loading.users"
-					:name="t('settings', 'Loading users …')"
-					:size="64" />
-				<NcIconSvgWrapper v-else
-					:svg="usersSvg" />
+				<NcLoadingIcon
+					v-if="isInitialLoad && loading.companies"
+					:name="t('settings', 'Loading companies …')"
+					:size="64"
+				/>
+				<NcIconSvgWrapper v-else :svg="usersSvg" />
 			</template>
 		</NcEmptyContent>
 
-		<RecycleScroller v-else
+		<RecycleScroller
+			v-else
 			ref="scroller"
 			class="user-list"
 			:style="style"
-			:items="filteredUsers"
-			key-field="id"
+			:items="filteredCompanies"
+			key-field="cid"
 			role="table"
 			list-tag="tbody"
 			list-class="user-list__body"
@@ -53,73 +62,86 @@
 			item-class="user-list__row"
 			:item-size="rowHeight"
 			@hook:mounted="handleMounted"
-			@scroll-end="handleScrollEnd">
+			@scroll-end="handleScrollEnd"
+		>
 			<template #before>
 				<caption class="hidden-visually">
-					{{ t('settings', 'List of users. This list is not fully rendered for performance reasons. The users will be rendered as you navigate through the list.') }}
+					{{
+						t(
+							"settings",
+							"List of companies. This list is not fully rendered for performance reasons. The companies will be rendered as you navigate through the list."
+						)
+					}}
 				</caption>
 				<UserListHeader :has-obfuscated="hasObfuscated" />
 			</template>
 
-			<template #default="{ item: user }">
-				<UserRow :user="user"
-					:users="users"
+			<template #default="{ item: company }">
+				<!-- :quota-options="quotaOptions" -->
+				<UserRow
+					:user="company"
+					:companies="companies"
 					:settings="settings"
 					:has-obfuscated="hasObfuscated"
 					:groups="groups"
-					:sub-admins-groups="subAdminsGroups"
-					:quota-options="quotaOptions"
 					:languages="languages"
-					:external-actions="externalActions" />
+					:external-actions="externalActions"
+				/>
 			</template>
 
 			<template #after>
-				<UserListFooter :loading="loading.users"
-					:filtered-users="filteredUsers" />
+				<ConpanyListFooter
+					:loading="loading.companies"
+					:filtered-companies="filteredCompanies"
+				/>
 			</template>
 		</RecycleScroller>
 	</Fragment>
 </template>
 
 <script>
-import Vue from 'vue'
-import { Fragment } from 'vue-frag'
-import { RecycleScroller } from 'vue-virtual-scroller'
+import Vue from "vue";
+import { Fragment } from "vue-frag";
+import { RecycleScroller } from "vue-virtual-scroller";
 
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js'
-import NcIconSvgWrapper from '@nextcloud/vue/dist/Components/NcIconSvgWrapper.js'
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent.js";
+import NcIconSvgWrapper from "@nextcloud/vue/dist/Components/NcIconSvgWrapper.js";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon.js";
 
-import { subscribe, unsubscribe } from '@nextcloud/event-bus'
-import { showError } from '@nextcloud/dialogs'
+import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+import { showError } from "@nextcloud/dialogs";
 
-import NewCompanyModal from './Companies/NewCompanyModal.vue'
-import UserListFooter from './Users/UserListFooter.vue'
-import UserListHeader from './Users/UserListHeader.vue'
-import UserRow from './Users/UserRow.vue'
+import NewCompanyModal from "./Companies/NewCompanyModal.vue";
+import ConpanyListFooter from "./Companies/ConpanyListFooter.vue";
+import UserListHeader from "./Companies/UserListHeader.vue";
+import UserRow from "./Companies/UserRow.vue";
 
-import { defaultQuota, isObfuscated, unlimitedQuota } from '../utils/userUtils.ts'
-import logger from '../logger.js'
+import {
+	defaultQuota,
+	isObfuscated,
+	unlimitedQuota,
+} from "../utils/userUtils.ts";
+import logger from "../logger.js";
 
-import usersSvg from '../../img/users.svg?raw'
+import usersSvg from "../../img/users.svg?raw";
 
 const newUser = {
-	id: '',
-	displayName: '',
-	password: '',
-	mailAddress: '',
+	id: "",
+	displayName: "",
+	password: "",
+	mailAddress: "",
 	groups: [],
-	manager: '',
+	manager: "",
 	subAdminsGroups: [],
 	quota: defaultQuota,
 	language: {
-		code: 'en',
-		name: t('settings', 'Default language'),
+		code: "en",
+		name: t("settings", "Default language"),
 	},
-}
+};
 
 export default {
-	name: 'UserList',
+	name: "UserList",
 
 	components: {
 		Fragment,
@@ -128,7 +150,7 @@ export default {
 		NcLoadingIcon,
 		NewCompanyModal,
 		RecycleScroller,
-		UserListFooter,
+		ConpanyListFooter,
 		UserListHeader,
 		UserRow,
 	},
@@ -149,203 +171,182 @@ export default {
 			loading: {
 				all: false,
 				groups: false,
-				users: false,
+				companies: false,
 			},
 			isInitialLoad: true,
 			rowHeight: 55,
 			usersSvg,
-			searchQuery: '',
+			searchQuery: "",
 			newUser: Object.assign({}, newUser),
-		}
+		};
 	},
 
 	computed: {
 		showConfig() {
-			return this.$store.getters.getShowConfig
+			return this.$store.getters.getShowConfig;
 		},
 
 		settings() {
-			return this.$store.getters.getServerData
+			return this.$store.getters.getServerData;
 		},
 
 		style() {
 			return {
-				'--row-height': `${this.rowHeight}px`,
-			}
+				"--row-height": `${this.rowHeight}px`,
+			};
 		},
 
 		hasObfuscated() {
-			return this.filteredUsers.some(user => isObfuscated(user))
+			return this.filteredCompanies.some((user) => isObfuscated(user));
 		},
 
-		users() {
-			return this.$store.getters.getUsers
+		companies() {
+			return this.$store.getters.getCompanies;
 		},
 
-		filteredUsers() {
-			if (this.selectedGroup === 'disabled') {
-				return this.users.filter(user => user.enabled === false)
+		filteredCompanies() {
+			if (this.selectedGroup === "disabled") {
+				return this.companies.filter((user) => user.enabled == false);
 			}
 			if (!this.settings.isAdmin) {
-				// we don't want subadmins to edit themselves
-				return this.users.filter(user => user.enabled !== false)
+				return this.companies.filter((user) => user.enabled !== false);
 			}
-			return this.users.filter(user => user.enabled !== false)
+			return this.companies.filter((user) => user.enabled != false);
 		},
 
 		groups() {
 			// data provided php side + remove the disabled group
 			return this.$store.getters.getGroups
-				.filter(group => group.id !== 'disabled')
-				.sort((a, b) => a.name.localeCompare(b.name))
+				.filter((group) => group.id !== "disabled")
+				.sort((a, b) => a.name.localeCompare(b.name));
 		},
 
 		subAdminsGroups() {
 			// data provided php side
-			return this.$store.getters.getSubadminGroups
+			return this.$store.getters.getSubadminGroups;
 		},
 
-		quotaOptions() {
-			// convert the preset array into objects
-			const quotaPreset = this.settings.quotaPreset.reduce((acc, cur) => acc.concat({
-				id: cur,
-				label: cur,
-			}), [])
-			// add default presets
-			if (this.settings.allowUnlimitedQuota) {
-				quotaPreset.unshift(unlimitedQuota)
-			}
-			quotaPreset.unshift(defaultQuota)
-			return quotaPreset
+		companiesOffset() {
+			return this.$store.getters.getCompaniesOffset;
 		},
 
-		usersOffset() {
-			return this.$store.getters.getUsersOffset
+		companiesLimit() {
+			return this.$store.getters.getCompaniesLimit;
 		},
 
-		usersLimit() {
-			return this.$store.getters.getUsersLimit
-		},
-
-		usersCount() {
-			return this.users.length
+		companiesCount() {
+			return this.companies.length;
 		},
 
 		/* LANGUAGES */
 		languages() {
 			return [
 				{
-					label: t('settings', 'Common languages'),
+					label: t("settings", "Common languages"),
 					languages: this.settings.languages.commonLanguages,
 				},
 				{
-					label: t('settings', 'Other languages'),
+					label: t("settings", "Other languages"),
 					languages: this.settings.languages.otherLanguages,
 				},
-			]
+			];
 		},
 	},
 
 	watch: {
-		// watch url change and group select
-		async selectedGroup(val, old) {
-			this.isInitialLoad = true
-			// if selected is the disabled group but it's empty
-			await this.redirectIfDisabled()
-			this.$store.commit('resetUsers')
-			await this.loadUsers()
-			this.setNewUserDefaultGroup(val)
-		},
-
-		filteredUsers(filteredUsers) {
-			logger.debug(`${filteredUsers.length} filtered user(s)`)
+		filteredCompanies(filteredCompanies) {
+			logger.debug(`${filteredCompanies.length} filtered user(s)`);
 		},
 	},
 
 	async created() {
-		await this.loadUsers()
+		await this.loadCompanies();
 	},
 
 	async mounted() {
 		if (!this.settings.canChangePassword) {
-			OC.Notification.showTemporary(t('settings', 'Password change is disabled because the master key is disabled'))
+			OC.Notification.showTemporary(
+				t(
+					"settings",
+					"Password change is disabled because the master key is disabled"
+				)
+			);
 		}
 
 		/**
 		 * Reset and init new user form
 		 */
-		this.resetForm()
+		this.resetForm();
 
 		/**
 		 * Register search
 		 */
-		subscribe('nextcloud:unified-search.search', this.search)
-		subscribe('nextcloud:unified-search.reset', this.resetSearch)
+		subscribe("nextcloud:unified-search.search", this.search);
+		subscribe("nextcloud:unified-search.reset", this.resetSearch);
 
 		/**
 		 * If disabled group but empty, redirect
 		 */
-		await this.redirectIfDisabled()
+		await this.redirectIfDisabled();
 	},
 
 	beforeDestroy() {
-		unsubscribe('nextcloud:unified-search.search', this.search)
-		unsubscribe('nextcloud:unified-search.reset', this.resetSearch)
+		unsubscribe("nextcloud:unified-search.search", this.search);
+		unsubscribe("nextcloud:unified-search.reset", this.resetSearch);
 	},
 
 	methods: {
 		async handleMounted() {
 			// Add proper semantics to the recycle scroller slots
-			const header = this.$refs.scroller.$refs.before
-			const footer = this.$refs.scroller.$refs.after
-			header.classList.add('user-list__header')
-			header.setAttribute('role', 'rowgroup')
-			footer.classList.add('user-list__footer')
-			footer.setAttribute('role', 'rowgroup')
+			const header = this.$refs.scroller.$refs.before;
+			const footer = this.$refs.scroller.$refs.after;
+			header.classList.add("user-list__header");
+			header.setAttribute("role", "rowgroup");
+			footer.classList.add("user-list__footer");
+			footer.setAttribute("role", "rowgroup");
 		},
 
 		async handleScrollEnd() {
-			await this.loadUsers()
+			await this.loadCompanies();
 		},
 
-		async loadUsers() {
-			this.loading.users = true
+		async loadCompanies() {
+			this.loading.companies = true;
 			try {
-				await this.$store.dispatch('getUsers', {
-					offset: this.usersOffset,
-					limit: this.usersLimit,
-					group: this.selectedGroup !== 'disabled' ? this.selectedGroup : '',
+				await this.$store.dispatch("getCompanies", {
+					offset: this.companiesOffset,
+					limit: this.companiesLimit,
 					search: this.searchQuery,
-				})
-				logger.debug(`${this.users.length} total user(s) loaded`)
+				});
+				logger.debug(`${this.companies.length} total user(s) loaded`);
 			} catch (error) {
-				logger.error('Failed to load users', { error })
-				showError('Failed to load users')
+				logger.error("Failed to load companies", { error });
+				showError("Failed to load companies");
 			}
-			this.loading.users = false
-			this.isInitialLoad = false
+			this.loading.companies = false
+			this.isInitialLoad = false;
 		},
 
 		closeModal() {
-			this.$store.commit('setShowConfig', {
-				key: 'showNewCompanyForm',
+			this.$store.commit("setShowConfig", {
+				key: "showNewCompanyForm",
 				value: false,
-			})
+			});
 		},
 
 		async search({ query }) {
-			this.searchQuery = query
-			this.$store.commit('resetUsers')
-			await this.loadUsers()
+			this.searchQuery = query;
+			this.$store.commit("resetUsers");
+			await this.loadCompanies();
 		},
 
 		resetSearch() {
-			this.search({ query: '' })
+			this.search({ query: "" });
 		},
 
 		resetForm() {
 			// revert form to original state
-			this.newUser = Object.assign({}, newUser)
+			this.newUser = Object.assign({}, newUser);
 
 			/**
 			 * Init default language from server data. The use of this.settings
@@ -353,52 +354,56 @@ export default {
 			 * this is a much easier solution than getter and setter on a computed var
 			 */
 			if (this.settings.defaultLanguage) {
-				Vue.set(this.newUser.language, 'code', this.settings.defaultLanguage)
+				Vue.set(this.newUser.language, "code", this.settings.defaultLanguage);
 			}
 
 			/**
 			 * In case the user directly loaded the user list within a group
 			 * the watch won't be triggered. We need to initialize it.
 			 */
-			this.setNewUserDefaultGroup(this.selectedGroup)
+			this.setNewUserDefaultGroup(this.selectedGroup);
 
-			this.loading.all = false
+			this.loading.all = false;
 		},
 
 		setNewUserDefaultGroup(value) {
 			if (value && value.length > 0) {
 				// setting new user default group to the current selected one
-				const currentGroup = this.groups.find(group => group.id === value)
+				const currentGroup = this.groups.find((group) => group.id === value);
 				if (currentGroup) {
-					this.newUser.groups = [currentGroup]
-					return
+					this.newUser.groups = [currentGroup];
+					return;
 				}
 			}
 			// fallback, empty selected group
-			this.newUser.groups = []
+			this.newUser.groups = [];
 		},
 
 		/**
 		 * If the selected group is the disabled group but the count is 0
-		 * redirect to the all users page.
+		 * redirect to the all companies page.
 		 * we only check for 0 because we don't have the count on ldap
 		 * and we therefore set the usercount to -1 in this specific case
 		 */
 		async redirectIfDisabled() {
-			const allGroups = this.$store.getters.getGroups
-			if (this.selectedGroup === 'disabled'
-						&& allGroups.findIndex(group => group.id === 'disabled' && group.usercount === 0) > -1) {
-				// disabled group is empty, redirection to all users
-				this.$router.push({ name: 'users' })
-				await this.loadUsers()
+			const allGroups = this.$store.getters.getGroups;
+			if (
+				this.selectedGroup === "disabled" &&
+				allGroups.findIndex(
+					(group) => group.id === "disabled" && group.usercount === 0
+				) > -1
+			) {
+				// disabled group is empty, redirection to all companies
+				this.$router.push({ name: "companies" });
+				await this.loadCompanies();
 			}
 		},
 	},
-}
+};
 </script>
 
 <style lang="scss" scoped>
-@import './Users/shared/styles.scss';
+@import "./Companies/shared/styles.scss";
 
 .empty {
 	:deep {
