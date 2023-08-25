@@ -309,25 +309,25 @@ class LoginController extends Controller {
 			$timezone_offset
 		);
 
-		$companyObject = $this->companyManager->get($company);
-		if ( $companyObject == null){
-			return $this->createLoginFailedResponse(
-				$data->getUsername(),
-				$user,
-				$redirect_url,
-				'Not found the Company('. $company. ')'
-			);
-		}
+		// $companyObject = $this->companyManager->get($company);
+		// if ( $companyObject == null){
+		// 	return $this->createLoginFailedResponse(
+		// 		$data->getUsername(),
+		// 		$user,
+		// 		$redirect_url,
+		// 		'Not found the Company('. $company. ')'
+		// 	);
+		// }
 
-		$userObject = $this->userManager->get($data->getUsername());		
-		if (!$companyObject->inCompany($userObject)){
-			return $this->createLoginFailedResponse(
-				$data->getUsername(),
-				$user,
-				$redirect_url,
-				'Not found the use in the Company('. $company. ')'
-			);
-		}
+		// $userObject = $this->userManager->get($data->getUsername());		
+		// if (!$companyObject->inCompany($userObject)){
+		// 	return $this->createLoginFailedResponse(
+		// 		$data->getUsername(),
+		// 		$user,
+		// 		$redirect_url,
+		// 		'Not found the use in the Company('. $company. ')'
+		// 	);
+		// }
 
 
 		$result = $loginChain->process($data);
