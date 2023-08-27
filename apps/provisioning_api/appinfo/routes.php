@@ -46,11 +46,11 @@ return [
 
 		// Companies
 		['root' => '/cloud', 'name' => 'Companies#getCompaniesDetails', 'url' => '/companies', 'verb' => 'GET'],
-		['root' => '/cloud', 'name' => 'Companies#getCompanyUsersDetails', 'url' => '/companies/{companyId}/users', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
-		['root' => '/cloud', 'name' => 'Companies#getCompany', 'url' => '/companies/{companyId}', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
 		['root' => '/cloud', 'name' => 'Companies#addCompany', 'url' => '/companies', 'verb' => 'POST'],
-		['root' => '/cloud', 'name' => 'Companies#deleteCompany', 'url' => '/companies/{companyId}', 'verb' => 'DELETE', 'requirements' => ['companyId' => '.+']],
+		['root' => '/cloud', 'name' => 'Companies#getCompanyUsersDetails', 'url' => '/companies/{companyId}/users', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
 		['root' => '/cloud', 'name' => 'Companies#getSubAdminsOfCompany', 'url' => '/companies/{companyId}/admins', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
+		['root' => '/cloud', 'name' => 'Companies#getCompany', 'url' => '/companies/{companyId}', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
+		['root' => '/cloud', 'name' => 'Companies#deleteCompany', 'url' => '/companies/{companyId}', 'verb' => 'DELETE', 'requirements' => ['companyId' => '.+']],
 
 
 		// Users
