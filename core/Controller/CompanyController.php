@@ -145,6 +145,16 @@ class CompanyController extends Controller {
 		}
 	}
 
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoSameSiteCookieRequired
+	 * 
+	 * remove a user from a company
+	 * 
+	 * @return JSONResponse<Http::STATUS_OK, array{}>
+
+	 */
 	public function members(string $cid, ?int $pageno=0, ?int $pagesize=null):JSONResponse{
 		try{
 			$company = $this->companyManager->get($cid);

@@ -161,7 +161,7 @@ class Database extends ABackend implements
 		$qb = $this->dbConn->getQueryBuilder();
 		$cursor = $qb->select('cu.cid', 'c.displayname')
 			->from('company_user', 'cu')
-			->leftJoin('gu', 'companies', 'c', $qb->expr()->eq('cu.cid', 'c.cid'))
+			->leftJoin('cu', 'companies', 'c', $qb->expr()->eq('cu.cid', 'c.cid'))
 			->where($qb->expr()->eq('uid', $qb->createNamedParameter($uid)))
 			->execute();
 

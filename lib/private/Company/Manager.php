@@ -20,11 +20,14 @@ class Manager extends PublicEmitter implements ICompanyManager {
 	private IEventDispatcher $dispatcher;
 	private LoggerInterface $logger;
 
+	private $subAdmin;
 	private $cachedCompanies = [];
 
 	private $cachedUserCompanies = [];
 
+
 	private DisplayNameCache $displayNameCache;
+
 
 	public function __construct(\OC\User\Manager $userManager,
 								IEventDispatcher $dispatcher,
@@ -251,5 +254,22 @@ class Manager extends PublicEmitter implements ICompanyManager {
 		}
 		return $matchingUsers;
 	}
+
+	/**
+	 * @return \OC\CompanyAdmin
+	 */
+	public function getSubAdmin() {
+		if (!$this->subAdmin) {
+			$this->subAdmin = new \OC\CompanyAdmin(
+				$this->userManager,
+				$this,
+				\OC::$server->getDatabaseConnection(),
+				$this->dispatcher
+			);
+		}
+
+		return $this->subAdmin;
+	}
+
 
 }

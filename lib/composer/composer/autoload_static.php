@@ -247,8 +247,12 @@ class ComposerStaticInit749170dad3f5e7f9ca158f5a9f04f6a2
         'OCP\\Company\\Events\\CompanyChangedEvent' => __DIR__ . '/../../..' . '/lib/public/Company/Events/CompanyChangedEvent.php',
         'OCP\\Company\\Events\\CompanyCreatedEvent' => __DIR__ . '/../../..' . '/lib/public/Company/Events/CompanyCreatedEvent.php',
         'OCP\\Company\\Events\\CompanyDeletedEvent' => __DIR__ . '/../../..' . '/lib/public/Company/Events/CompanyDeletedEvent.php',
+        'OCP\\Company\\Events\\SubAdminAddedEvent' => __DIR__ . '/../../..' . '/lib/public/Company/Events/SubAdminAddedEvent.php',
+        'OCP\\Company\\Events\\SubAdminRemovedEvent' => __DIR__ . '/../../..' . '/lib/public/Company/Events/SubAdminRemovedEvent.php',
         'OCP\\Company\\Events\\UserAddedEvent' => __DIR__ . '/../../..' . '/lib/public/Company/Events/UserAddedEvent.php',
         'OCP\\Company\\Events\\UserRemovedEvent' => __DIR__ . '/../../..' . '/lib/public/Company/Events/UserRemovedEvent.php',
+
+        'OCP\\Group\\ISubAdmin' => __DIR__ . '/../../..' . '/lib/public/Company/ISubAdmin.php',
 
         'OCP\\Config\\BeforePreferenceDeletedEvent' => __DIR__ . '/../../..' . '/lib/public/Config/BeforePreferenceDeletedEvent.php',
         'OCP\\Config\\BeforePreferenceSetEvent' => __DIR__ . '/../../..' . '/lib/public/Config/BeforePreferenceSetEvent.php',

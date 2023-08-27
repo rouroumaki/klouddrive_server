@@ -44,6 +44,15 @@ return [
 		['root' => '/cloud', 'name' => 'Groups#updateGroup', 'url' => '/groups/{groupId}', 'verb' => 'PUT', 'requirements' => ['groupId' => '.+']],
 		['root' => '/cloud', 'name' => 'Groups#deleteGroup', 'url' => '/groups/{groupId}', 'verb' => 'DELETE', 'requirements' => ['groupId' => '.+']],
 
+		// Companies
+		['root' => '/cloud', 'name' => 'Companies#getCompaniesDetails', 'url' => '/companies/details', 'verb' => 'GET'],
+		['root' => '/cloud', 'name' => 'Companies#getCompanyUsersDetails', 'url' => '/companies/{companyId}/users', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
+		['root' => '/cloud', 'name' => 'Companies#getCompany', 'url' => '/companies/{companyId}', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
+		['root' => '/cloud', 'name' => 'Companies#addCompany', 'url' => '/companies', 'verb' => 'POST'],
+		['root' => '/cloud', 'name' => 'Companies#deleteCompany', 'url' => '/companies/{companyId}', 'verb' => 'DELETE', 'requirements' => ['companyId' => '.+']],
+		['root' => '/cloud', 'name' => 'Companies#getSubAdminsOfCompany', 'url' => '/companies/{groupId}/subadmins', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
+
+
 		// Users
 		['root' => '/cloud', 'name' => 'Users#getUsers', 'url' => '/users', 'verb' => 'GET'],
 		['root' => '/cloud', 'name' => 'Users#getUsersDetails', 'url' => '/users/details', 'verb' => 'GET'],
@@ -66,7 +75,13 @@ return [
 		['root' => '/cloud', 'name' => 'Users#addSubAdmin', 'url' => '/users/{userId}/subadmins', 'verb' => 'POST'],
 		['root' => '/cloud', 'name' => 'Users#removeSubAdmin', 'url' => '/users/{userId}/subadmins', 'verb' => 'DELETE'],
 		['root' => '/cloud', 'name' => 'Users#resendWelcomeMessage', 'url' => '/users/{userId}/welcome', 'verb' => 'POST'],
-
+		['root' => '/cloud', 'name' => 'Users#getUsersCompanies', 'url' => '/users/{userId}/companies', 'verb' => 'GET'],
+		['root' => '/cloud', 'name' => 'Users#addToCompany', 'url' => '/users/{userId}/companies', 'verb' => 'POST'],
+		['root' => '/cloud', 'name' => 'Users#removeFromCompany', 'url' => '/users/{userId}/companies', 'verb' => 'DELETE'],
+		['root' => '/cloud', 'name' => 'Users#getUserSubAdminCompanies', 'url' => '/users/{userId}/companyadmins', 'verb' => 'GET'],
+		['root' => '/cloud', 'name' => 'Users#addCompanyAdmin', 'url' => '/users/{userId}/companyadmins', 'verb' => 'POST'],
+		['root' => '/cloud', 'name' => 'Users#removeCompanyAdmin', 'url' => '/users/{userId}/companyadmins', 'verb' => 'DELETE'],
+		
 		// Config
 		['name' => 'AppConfig#getApps', 'url' => '/api/v1/config/apps', 'verb' => 'GET'],
 		['name' => 'AppConfig#getKeys', 'url' => '/api/v1/config/apps/{app}', 'verb' => 'GET'],

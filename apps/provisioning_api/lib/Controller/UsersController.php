@@ -66,6 +66,8 @@ use OCP\HintException;
 use OCP\IConfig;
 use OCP\IGroup;
 use OCP\IGroupManager;
+use OCP\ICompanyManager;
+use OCP\ICompany;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\IUser;
@@ -97,6 +99,8 @@ class UsersController extends AUserData {
 	private $knownUserService;
 	/** @var IEventDispatcher */
 	private $eventDispatcher;
+	/** @var ICompanyManager */
+	private $companyManager;
 
 	public function __construct(
 		string $appName,
@@ -104,6 +108,7 @@ class UsersController extends AUserData {
 		IUserManager $userManager,
 		IConfig $config,
 		IGroupManager $groupManager,
+		ICompanyManager $companyManager,
 		IUserSession $userSession,
 		IAccountManager $accountManager,
 		IURLGenerator $urlGenerator,
@@ -134,10 +139,12 @@ class UsersController extends AUserData {
 		$this->remoteWipe = $remoteWipe;
 		$this->knownUserService = $knownUserService;
 		$this->eventDispatcher = $eventDispatcher;
+		$this->companyManager = $companyManager;
 	}
 
 	/**
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 *
 	 * Get a list of users
 	 *
@@ -177,6 +184,7 @@ class UsersController extends AUserData {
 
 	/**
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 *
 	 * Get a list of users and their details
 	 *
@@ -230,6 +238,7 @@ class UsersController extends AUserData {
 
 
 	/**
+	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
 	 *
@@ -331,6 +340,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @PasswordConfirmationRequired
 	 * @NoAdminRequired
 	 *
@@ -345,6 +355,7 @@ class UsersController extends AUserData {
 	 * @param string $quota Quota of the user
 	 * @param string $language Language of the user
 	 * @param ?string $manager Manager of the user
+	 * @param ?string $companyid Company of the user
 	 * @return DataResponse<Http::STATUS_OK, array{id: string}, array{}>
 	 * @throws OCSException
 	 * @throws OCSForbiddenException Missing permissions to make user subadmin
@@ -361,6 +372,7 @@ class UsersController extends AUserData {
 		string $quota = '',
 		string $language = '',
 		?string $manager = null,
+		?string $companyid = null,
 	): DataResponse {
 		$user = $this->userSession->getUser();
 		$isAdmin = $this->groupManager->isAdmin($user->getUID());
@@ -478,6 +490,13 @@ class UsersController extends AUserData {
 				$this->editUser($userid, self::USER_FIELD_MANAGER, $manager);
 			}
 
+			if ($companyid !== null){
+				$company = $this->companyManager->get($companyid);
+				if ($company !== null){
+					$company->addUser($newUser);
+				}
+			}
+
 			// Send new user mail only if a mail is set
 			if ($email !== '') {
 				$newUser->setEMailAddress($email);
@@ -540,6 +559,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
 	 *
@@ -565,6 +585,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
 	 *
@@ -585,6 +606,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
 	 *
@@ -603,6 +625,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
 	 *
@@ -664,6 +687,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
 	 * @PasswordConfirmationRequired
@@ -764,6 +788,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
 	 * @PasswordConfirmationRequired
@@ -1077,6 +1102,7 @@ class UsersController extends AUserData {
 	}
 
 	/**
+	 * @NoCSRFRequired
 	 * @PasswordConfirmationRequired
 	 * @NoAdminRequired
 	 *
@@ -1483,4 +1509,211 @@ class UsersController extends AUserData {
 
 		return new DataResponse();
 	}
+
+
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 * @NoSubAdminRequired
+	 *
+	 * Get a list of companies the user belongs to
+	 *
+	 * @param string $userId ID of the user
+	 * @return DataResponse<Http::STATUS_OK, array{groups: string[]}, array{}>
+	 * @throws OCSException
+	 */
+	public function getUsersCompanies(string $userId): DataResponse {
+		$loggedInUser = $this->userSession->getUser();
+
+		$targetUser = $this->userManager->get($userId);
+		if ($targetUser === null) {
+			throw new OCSException('', OCSController::RESPOND_NOT_FOUND);
+		}
+
+		if ($targetUser->getUID() === $loggedInUser->getUID()) {
+			return new DataResponse([
+				'companies' => $this->companyManager->getUserCompanyIds($targetUser)
+			]);
+		} else {
+			$subAdminManager = $this->companyManager->getSubAdmin();
+
+			if ($subAdminManager->isUserAccessible($loggedInUser, $targetUser)) {
+				$getSubAdminsCompanies = $subAdminManager->getSubAdminsCompanies($loggedInUser);
+				foreach ($getSubAdminsCompanies as $key => $company) {
+					$getSubAdminsCompanies[$key] = $company->getCID();
+				}
+				$companies = array_intersect(
+					$getSubAdminsCompanies,
+					$this->companyManager->getUserCompanyIds($targetUser)
+				);
+				return new DataResponse(['companies' => $companies]);
+			} else {
+				throw new OCSException('', OCSController::RESPOND_NOT_FOUND);
+			}
+		}
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 *
+	 * Add a user to a company
+	 *
+	 * @param string $userId ID of the user
+	 * @param string $companyid ID of the company
+	 * @return DataResponse<Http::STATUS_OK, array<empty>, array{}>
+	 * @throws OCSException
+	 */
+	public function addToCompany(string $userId, string $companyid = ''): DataResponse {
+		if ($companyid === '') {
+			throw new OCSException('', 101);
+		}
+
+		$company = $this->companyManager->get($companyid);
+		$targetUser = $this->userManager->get($userId);
+		if ($company === null) {
+			throw new OCSException('', 102);
+		}
+		if ($targetUser === null) {
+			throw new OCSException('', 103);
+		}
+
+		$loggedInUser = $this->userSession->getUser();
+		$subAdminManager = $this->companyManager->getSubAdmin();
+		if (!$subAdminManager->isSubAdminOfCompany($loggedInUser, $company)) {
+			throw new OCSException('', 104);
+		}
+
+		$company->addUser($targetUser);
+		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 *
+	 * Remove a user from a company
+	 *
+	 * @param string $userId ID of the user
+	 * @param string $companyid ID of the company
+	 * @return DataResponse<Http::STATUS_OK, array<empty>, array{}>
+	 * @throws OCSException
+	 */
+	public function removeFromCompany(string $userId, string $companyid): DataResponse {
+		$loggedInUser = $this->userSession->getUser();
+
+		if ($companyid === null || trim($companyid) === '') {
+			throw new OCSException('', 101);
+		}
+
+		$company = $this->companyManager->get($companyid);
+		if ($company === null) {
+			throw new OCSException('Not found the company', 102);
+		}
+
+		$targetUser = $this->userManager->get($userId);
+		if ($targetUser === null) {
+			throw new OCSException('Not found the user', 103);
+		}
+
+		
+		$subAdminManager = $this->companyManager->getSubAdmin();
+		if (!$subAdminManager->isSubAdminOfCompany($loggedInUser, $company)) {
+			throw new OCSException('Not admin of the company.', 104);
+		}
+
+		if ($targetUser->getUID() === $loggedInUser->getUID()) {
+			throw new OCSException('Cannot remove yourself from this company as you are Admin of the company', 105);
+		} else{
+			$company->removeUser($targetUser);
+		}
+
+		$company->removeUser($targetUser);
+		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 *
+	 * Make a user a subadmin of a company
+	 *
+	 * @param string $userId ID of the user
+	 * @param string $companyid ID of the company
+	 * @return DataResponse<Http::STATUS_OK, array<empty>, array{}>
+	 * @throws OCSException
+	 */
+	public function addCompanyAdmin(string $userId, string $companyid): DataResponse {
+		$company = $this->companyManager->get($companyid);
+		$user = $this->userManager->get($userId);
+
+		if ($user === null) {
+			throw new OCSException('User does not exist', 101);
+		}
+		if ($company === null) {
+			throw new OCSException('Company does not exist', 102);
+		}
+		
+
+		$subAdminManager = $this->companyManager->getSubAdmin();
+
+		if ($subAdminManager->isSubAdminOfCompany($user, $company)) {
+			return new DataResponse();
+		}
+		$subAdminManager->createSubAdmin($user, $company);
+		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 *
+	 * Remove a user from the subadmins of a company
+	 *
+	 * @param string $userId ID of the user
+	 * @param string $companyid ID of the company
+	 * @return DataResponse<Http::STATUS_OK, array<empty>, array{}>
+	 * @throws OCSException
+	 */
+	public function removeCompanyAdmin(string $userId, string $companyid): DataResponse {
+		$company = $this->companyManager->get($companyid);
+		$user = $this->userManager->get($userId);
+		$subAdminManager = $this->companyManager->getSubAdmin();
+
+		if ($user === null) {
+			throw new OCSException('User does not exist', 101);
+		}
+		if ($company === null) {
+			throw new OCSException('Company does not exist', 101);
+		}
+		if (!$subAdminManager->isSubAdminOfCompany($user, $company)) {
+			throw new OCSException('User is not a subadmin of this group', 102);
+		}
+
+		$subAdminManager->deleteSubAdmin($user, $company);
+		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * Get the companies a user is a subadmin of
+	 *
+	 * @param string $userId ID if the user
+	 * @return DataResponse<Http::STATUS_OK, string[], array{}>
+	 * @throws OCSException
+	 */
+	public function getUserSubAdminCompanies(string $userId): DataResponse {
+		$user = $this->userManager->get($userId);
+		if ($user === null) {
+			throw new OCSException('User does not exist', 101);
+		}
+
+		$subAdminCompanies = $this->companyManager->getSubAdmin()->getSubAdminsCompanies($user);
+		$companies = [];
+		foreach ($subAdminCompanies as $key => $company) {
+			$companies[] = $company->getCID();
+		}
+
+		return new DataResponse($companies);
+	}
+
 }

@@ -81,9 +81,23 @@ class Version28000Date20230821152055 extends SimpleMigrationStep {
 			]);
 			$table->setPrimaryKey(['cid', 'uid']);
 			$table->addIndex(['uid'], 'cu_uid_index');
-
 		}
 
+		if (!$schema->hasTable('company_admin')) {
+			$table = $schema->createTable('company_admin');
+			$table->addColumn('cid', 'string', [
+				'notnull' => true,
+				'length' => 64,
+				'default' => '',
+			]);
+			$table->addColumn('uid', 'string', [
+				'notnull' => true,
+				'length' => 64,
+				'default' => '',
+			]);
+			$table->setPrimaryKey(['cid', 'uid']);
+			$table->addIndex(['uid'], 'ca_uid_index');
+		}
 		return $schema;
 	}
 }

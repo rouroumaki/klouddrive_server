@@ -60,6 +60,7 @@ use OCP\Console\ConsoleEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
 use OCP\IGroupManager;
+use OCP\ICompanyManager;
 use OCP\IUserSession;
 use OCP\Log\Audit\CriticalActionPerformedEvent;
 use OCP\Log\ILogFactory;
@@ -104,6 +105,7 @@ class Application extends App implements IBootstrap {
 								   ContainerInterface $serverContainer): void {
 		$this->userManagementHooks($logger, $serverContainer->get(IUserSession::class));
 		$this->groupHooks($logger, $serverContainer->get(IGroupManager::class));
+		$this->companyHooks($logger, $serverContainer->get(ICompanyManager::class));
 		$this->authHooks($logger);
 
 
@@ -144,6 +146,10 @@ class Application extends App implements IBootstrap {
 		$groupManager->listen('\OC\Group', 'postAddUser', [$groupActions, 'addUser']);
 		$groupManager->listen('\OC\Group', 'postDelete', [$groupActions, 'deleteGroup']);
 		$groupManager->listen('\OC\Group', 'postCreate', [$groupActions, 'createGroup']);
+	}
+
+	private function companyHooks(IAuditLogger $logger, ICompanyManager $companyManager): void{
+
 	}
 
 	private function sharingHooks(IAuditLogger $logger): void {
