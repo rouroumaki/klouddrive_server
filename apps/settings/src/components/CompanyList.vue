@@ -26,6 +26,7 @@
 			v-if="showConfig.showNewCompanyForm"
 			:loading="loading"
 			:new-user="newUser"
+			:quota-options="quotaOptions"
 			@reset="resetForm"
 			@close="closeModal"
 		/>
@@ -54,7 +55,7 @@
 			class="user-list"
 			:style="style"
 			:items="filteredCompanies"
-			key-field="cid"
+			key-field="id"
 			role="table"
 			list-tag="tbody"
 			list-class="user-list__body"
@@ -138,6 +139,9 @@ const newUser = {
 		code: "en",
 		name: t("settings", "Default language"),
 	},
+	adminUser: '',
+	adminDisplayname: '',
+	adminPassword: '',
 };
 
 export default {
@@ -214,6 +218,20 @@ export default {
 			return this.companies.filter((user) => user.enabled != false);
 		},
 
+		quotaOptions() {
+			// convert the preset array into objects
+			const quotaPreset = this.settings.quotaPreset.reduce((acc, cur) => acc.concat({
+				id: cur,
+				label: cur,
+			}), [])
+			// add default presets
+			if (this.settings.allowUnlimitedQuota) {
+				quotaPreset.unshift(unlimitedQuota)
+			}
+			quotaPreset.unshift(defaultQuota)
+			return quotaPreset
+		},
+
 		groups() {
 			// data provided php side + remove the disabled group
 			return this.$store.getters.getGroups
@@ -259,11 +277,8 @@ export default {
 		},
 	},
 
-	async created() {
-		await this.loadCompanies();
-	},
-
 	async mounted() {
+		await this.loadCompanies();
 		if (!this.settings.canChangePassword) {
 			OC.Notification.showTemporary(
 				t(

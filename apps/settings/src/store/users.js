@@ -78,9 +78,9 @@ const state = {
 
 const mutations = {
 	appendCompanies(state, companiesObj) {
-		const existingCompanies = state.companies.map(({ cid }) => cid)
+		const existingCompanies = state.companies.map(({ id }) => id)
 		const newCompany = Object.values(companiesObj)
-			.filter(({ cid }) => !existingCompanies.includes(cid))
+			.filter(({ id }) => !existingCompanies.includes(id))
 		const companies = state.companies.concat(newCompany)
 		state.companiesOffset += state.companiesLimit
 		state.companies = companies
@@ -170,6 +170,11 @@ const mutations = {
 		this.commit('updateUserCounts', { user: state.users[userIndex], actionType: 'remove' })
 		state.users.splice(userIndex, 1)
 	},
+	deleteCompany(state, companyId) {
+		const companyIndex = state.companies.findIndex(company => company.id === companyId)
+		this.commit('updateCompanyCounts', { company: state.companies[companyIndex], actionType: 'remove' })
+		state.users.splice(userIndex, 1)
+	},
 	addUserData(state, response) {
 		const user = response.data.ocs.data
 		state.users.unshift(user)
@@ -238,6 +243,7 @@ const mutations = {
 			break
 		case 'remove':
 			state.companyCount--
+			state.companies = state.companies.filter(item=>item.id == company.id)
 			break
 		default:
 			logger.error(`Unknown action type in updateCompanyCounts: '${actionType}'`)
@@ -356,7 +362,7 @@ const actions = {
 	 * @param {string} options.group Get users from group
 	 * @return {Promise}
 	 */
-	getUsers(context, { offset, limit, search, group }) {
+	getUsers(context, { offset, limit, search, group, companyId }) {
 		if (searchRequestCancelSource) {
 			searchRequestCancelSource.cancel('Operation canceled by another search request.')
 		}
@@ -364,7 +370,7 @@ const actions = {
 		search = typeof search === 'string' ? search : ''
 		group = typeof group === 'string' ? group : ''
 		if (group !== '') {
-			return api.get(generateOcsUrl('cloud/groups/{group}/users/details?offset={offset}&limit={limit}&search={search}', { group: encodeURIComponent(group), offset, limit, search }), {
+			return api.get(generateOcsUrl('cloud/groups/{group}/users/details?offset={offset}&limit={limit}&search={search}&companyId={companyId}', { group: encodeURIComponent(group), offset, limit, search, companyId }), {
 				cancelToken: searchRequestCancelSource.token,
 			})
 				.then((response) => {
@@ -380,8 +386,8 @@ const actions = {
 					}
 				})
 		}
-
-		return api.get(generateOcsUrl('cloud/users/details?offset={offset}&limit={limit}&search={search}', { offset, limit, search }), {
+		// generateOcsUrl('cloud/users/details?offset={offset}&limit={limit}&search={search}&companyId={companyId}', { offset, limit, search, companyId }
+		return api.get(generateOcsUrl(`cloud/companies/test2/users?offset={offset}&limit={limit}&search={search}`, { offset, limit, search, companyId }), {
 			cancelToken: searchRequestCancelSource.token,
 		})
 			.then((response) => {
@@ -403,13 +409,13 @@ const actions = {
 			searchRequestCancelSource.cancel('Operation canceled by another search request.')
 		}
 		searchRequestCancelSource = CancelToken.source()
-		return api.get(generateUrl(`companylist?pageno=${offset}&pagesize=${limit}&search=${search}`), {
+		return api.get(generateOcsUrl(`cloud/companies?offset=${offset}&limit=${limit}&search=${search}`), {
 			cancelToken: searchRequestCancelSource.token,
 		})
 			.then((response) => {
-				const companyCount = Object.keys(response.data.data).length
+				const companyCount = Object.keys(response.data.ocs.data.companies).length
 				if (companyCount > 0) {
-					context.commit('appendCompanies', response.data.data)
+					context.commit('appendCompanies', response.data.ocs.data.companies)
 				}
 				return companyCount
 			})
@@ -647,6 +653,14 @@ const actions = {
 		}).catch((error) => context.commit('API_FAILURE', { userid, error }))
 	},
 
+	deleteCompany(context, companyId) {
+		return api.requireAdmin().then((response) => {
+			return api.delete(generateOcsUrl(`cloud/companies/{companyId}`,{companyId}))
+				.then((response) => context.commit('deleteCompany', userid))
+				.catch((error) => { throw error })
+		}).catch((error) => context.commit('API_FAILURE', { userid, error }))
+	},
+
 	/**
 	 * Add a user
 	 *
@@ -665,9 +679,9 @@ const actions = {
 	 * @param {string} options.manager User manager
 	 * @return {Promise}
 	 */
-	addUser({ commit, dispatch }, { userid, password, displayName, email, groups, subadmin, quota, language, manager }) {
+	addUser({ commit, dispatch }, { userid, password, displayName, email, groups, subadmin, quota, language, manager, companyId }) {
 		return api.requireAdmin().then((response) => {
-			return api.post(generateOcsUrl('cloud/users'), { userid, password, displayName, email, groups, subadmin, quota, language, manager })
+			return api.post(generateOcsUrl('cloud/users'), { userid, password, displayName, email, groups, subadmin, quota, language, manager, companyId })
 				.then((response) => dispatch('addUserData', userid || response.data.ocs.data.id))
 				.catch((error) => { throw error })
 		}).catch((error) => {
@@ -676,15 +690,23 @@ const actions = {
 		})
 	},
 
-	addCompany({ commit, dispatch }, { userid, password, displayName }) {
+	addCompany({ commit, dispatch }, { companyId, password, displayName,adminUser,adminDisplayname,adminPassword }) {
 		return api.requireAdmin().then((response) => {
-			return api.post(generateUrl('/company/create'), { cid:userid, password, displayName })
-				.then((response) => dispatch('addUserData', response.data.data))
+			return api.post(generateOcsUrl(`cloud/companies?companyid=${companyId}&displayname=${displayName}&pwd=${password}`))
+				.then((response) => {
+					dispatch('getCompanies', { offset: 0, limit: 25, search: '' })
+					dispatch('addCompanyAdmin',{companyId,adminUser,adminDisplayname,adminPassword})
+				})
 				.catch((error) => { throw error })
 		}).catch((error) => {
-			commit('API_FAILURE', { userid, error })
+			commit('API_FAILURE', { companyId, error })
 			throw error
 		})
+	},
+
+	async addCompanyAdmin({ commit, dispatch }, { companyId, adminUser, adminDisplayname, adminPassword }) {
+		await dispatch('addUser', { userid: adminUser, displayName: adminDisplayname, password: adminPassword })
+		return api.post(generateOcsUrl(`cloud/users/{userId}/companyadmins?companyid=${companyId}`,{userId:adminUser}))
 	},
 
 	/**

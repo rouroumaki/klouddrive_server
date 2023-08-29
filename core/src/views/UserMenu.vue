@@ -50,6 +50,7 @@ import NcAvatar from '@nextcloud/vue/dist/Components/NcAvatar.js'
 import NcHeaderMenu from '@nextcloud/vue/dist/Components/NcHeaderMenu.js'
 
 import UserMenuEntry from '../components/UserMenu/UserMenuEntry.vue'
+import axios from '@nextcloud/axios'
 
 const settingsNavEntries = loadState('core', 'settingsNavEntries', [])
 
@@ -70,8 +71,19 @@ export default {
 	},
 
 	mounted() {
+		axios.get(location.origin + `/ocs/v2.php/cloud/users/${this.userId}/companies`).then(res => {
+			console.log(res);
+			console.log(res.data.ocs.data);
+			debugger
+		})
+		// fetch().then(res => res.json()).then(res => {
+		// 	console.log(res);
+		// 	debugger
+		// }).catch(err => {
+		// 	console.log(err)
+		// })
 		this.$set(this.settingsNavEntries.core_users, 'name', '公司')
-		// this.$set(this.settingsNavEntries.core_users, 'href', '/index.php/settings/companies')
+		this.$set(this.settingsNavEntries.core_users, 'href', '/index.php/settings/companies')
 		// console.log(this.settingsNavEntries);
 		// debugger
 		emit('core:user-menu:mounted')

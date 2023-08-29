@@ -25,6 +25,7 @@
 		<NewUserModal v-if="showConfig.showNewUserForm"
 			:loading="loading"
 			:new-user="newUser"
+			:companyId="companyId"
 			:quota-options="quotaOptions"
 			@reset="resetForm"
 			@close="closeModal" />
@@ -117,6 +118,7 @@ const newUser = {
 		code: 'en',
 		name: t('settings', 'Default language'),
 	},
+	companyId: 0,
 }
 
 export default {
@@ -268,6 +270,7 @@ export default {
 	},
 
 	async mounted() {
+		this.companyId = this.$route.query.companyId
 		if (!this.settings.canChangePassword) {
 			OC.Notification.showTemporary(t('settings', 'Password change is disabled because the master key is disabled'))
 		}
@@ -317,6 +320,7 @@ export default {
 					limit: this.usersLimit,
 					group: this.selectedGroup !== 'disabled' ? this.selectedGroup : '',
 					search: this.searchQuery,
+					companyId: this.companyId
 				})
 				logger.debug(`${this.users.length} total user(s) loaded`)
 			} catch (error) {

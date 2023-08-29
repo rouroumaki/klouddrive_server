@@ -60,6 +60,7 @@ return [
 		['name' => 'Users#setUserSettings', 'url' => '/settings/users/{username}/settings', 'verb' => 'PUT' , 'root' => ''],
 		['name' => 'Users#getVerificationCode', 'url' => '/settings/users/{account}/verify', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'Users#usersList', 'url' => '/settings/users', 'verb' => 'GET' , 'root' => ''],
+		['name' => 'Users#companyList', 'url' => '/settings/companies', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'Users#usersListByGroup', 'url' => '/settings/users/{group}', 'verb' => 'GET', 'requirements' => ['group' => '.+'] , 'root' => ''],
 		['name' => 'Users#setPreference', 'url' => '/settings/users/preferences/{key}', 'verb' => 'POST' , 'root' => ''],
 		['name' => 'LogSettings#setLogLevel', 'url' => '/settings/admin/log/level', 'verb' => 'POST' , 'root' => ''],

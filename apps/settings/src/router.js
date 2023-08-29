@@ -53,33 +53,15 @@ const router = new Router({
 	linkActiveClass: 'active',
 	routes: [
 		{
-			path: '/:index(index.php/)?/companies',
+			path: '/:index(index.php/)?/settings/companies',
 			component: Companies,
 			props: true,
-			name: 'users',
+			name: 'companies',
 			meta: {
 				title: () => {
 					return t('settings', 'Active users')
 				},
 			},
-			children: [
-				{
-					path: ':selectedGroup',
-					name: 'group',
-					meta: {
-						title: (to) => {
-							if (to.params.selectedGroup === 'admin') {
-								return t('settings', 'Admins')
-							}
-							if (to.params.selectedGroup === 'disabled') {
-								return t('settings', 'Disabled users')
-							}
-							return decodeURIComponent(to.params.selectedGroup)
-						},
-					},
-					component: Users,
-				},
-			],
 		},
 		{
 			path: '/:index(index.php/)?settings/users',

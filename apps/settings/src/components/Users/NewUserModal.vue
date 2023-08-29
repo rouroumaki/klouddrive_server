@@ -209,6 +209,11 @@ export default {
 			type: Array,
 			required: true,
 		},
+
+		companyId: {
+			type: Number,
+			required: true
+		}
 	},
 
 	data() {
@@ -296,6 +301,7 @@ export default {
 					quota: this.newUser.quota.id,
 					language: this.newUser.language.code,
 					manager: this.newUser.manager.id,
+					companyId: this.companyId
 				})
 
 				this.$emit('reset')

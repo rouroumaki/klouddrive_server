@@ -52,7 +52,6 @@ return [
 		['root' => '/cloud', 'name' => 'Companies#getCompany', 'url' => '/companies/{companyId}', 'verb' => 'GET', 'requirements' => ['companyId' => '.+']],
 		['root' => '/cloud', 'name' => 'Companies#deleteCompany', 'url' => '/companies/{companyId}', 'verb' => 'DELETE', 'requirements' => ['companyId' => '.+']],
 
-
 		// Users
 		['root' => '/cloud', 'name' => 'Users#getUsers', 'url' => '/users', 'verb' => 'GET'],
 		['root' => '/cloud', 'name' => 'Users#getUsersDetails', 'url' => '/users/details', 'verb' => 'GET'],

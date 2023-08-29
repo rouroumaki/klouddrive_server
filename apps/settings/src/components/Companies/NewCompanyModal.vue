@@ -21,15 +21,16 @@
 -->
 
 <template>
-	<NcModal class="modal"
-		size="small"
-		v-on="$listeners">
-		<form class="modal__form"
+	<NcModal class="modal" size="small" v-on="$listeners">
+		<form
+			class="modal__form"
 			data-test="form"
 			:disabled="loading.all"
-			@submit.prevent="createUser">
+			@submit.prevent="createCompany"
+		>
 			<h2>新建公司</h2>
-			<NcTextField ref="username"
+			<NcTextField
+				ref="username"
 				class="modal__item"
 				data-test="username"
 				:value.sync="newUser.id"
@@ -38,92 +39,106 @@
 				autocapitalize="none"
 				autocomplete="off"
 				autocorrect="off"
-				required />
-			<NcTextField class="modal__item"
+				required
+			/>
+			<NcTextField
+				class="modal__item"
 				data-test="displayName"
 				:value.sync="newUser.displayName"
 				:label="t('settings', 'Display name')"
 				:label-visible="true"
 				autocapitalize="none"
 				autocomplete="off"
-				autocorrect="off" />
-			<NcPasswordField ref="password"
+				autocorrect="off"
+			/>
+			<NcPasswordField
+				ref="password"
 				class="modal__item"
 				data-test="password"
 				:value.sync="newUser.password"
 				:minlength="minPasswordLength"
 				:maxlength="469"
 				aria-describedby="password-email-hint"
-				:label="newUser.mailAddress === '' ? t('settings', 'Password (required)') : t('settings', 'Password')"
+				:label="
+					newUser.mailAddress === ''
+						? t('settings', 'Password (required)')
+						: t('settings', 'Password')
+				"
 				:label-visible="true"
 				autocapitalize="none"
 				autocomplete="new-password"
 				autocorrect="off"
-				:required="newUser.mailAddress === ''" />
-			<div v-if="subAdminsGroups.length > 0 && settings.isAdmin"
-				class="modal__item">
-				<label class="modal__label"
-					for="new-user-sub-admin">
-					{{ t('settings', 'Administered groups') }}
-				</label>
-				<NcSelect v-model="newUser.subAdminsGroups"
-					class="modal__select"
-					input-id="new-user-sub-admin"
-					:placeholder="t('settings', 'Set user as admin for …')"
-					:options="subAdminsGroups"
-					:close-on-select="false"
-					:multiple="true"
-					label="name" />
-			</div>
+				:required="newUser.mailAddress === ''"
+			/>
 			<div class="modal__item">
-				<label class="modal__label"
-					for="new-user-quota">
-					{{ t('settings', 'Quota') }}
+				<label class="modal__label" for="new-user-quota">
+					{{ t("settings", "Quota") }}
 				</label>
-				<NcSelect v-model="newUser.quota"
+				<NcSelect
+					v-model="newUser.quota"
 					class="modal__select"
 					input-id="new-user-quota"
 					:placeholder="t('settings', 'Set user quota')"
 					:options="quotaOptions"
 					:clearable="false"
 					:taggable="true"
-					:create-option="validateQuota" />
+					:create-option="validateQuota"
+				/>
 			</div>
-			<div v-if="showConfig.showLanguages"
-				class="modal__item">
-				<label class="modal__label"
-					for="new-user-language">
-					{{ t('settings', 'Language') }}
+			<div v-if="showConfig.showLanguages" class="modal__item">
+				<label class="modal__label" for="new-user-language">
+					{{ t("settings", "Language") }}
 				</label>
-				<NcSelect	v-model="newUser.language"
+				<NcSelect
+					v-model="newUser.language"
 					class="modal__select"
 					input-id="new-user-language"
 					:placeholder="t('settings', 'Set default language')"
 					:clearable="false"
-					:selectable="option => !option.languages"
+					:selectable="(option) => !option.languages"
 					:filter-by="languageFilterBy"
 					:options="languages"
-					label="name" />
+					label="name"
+				/>
 			</div>
-			<div :class="['modal__item managers', { 'icon-loading-small': loading.manager }]">
-				<label class="modal__label"
-					for="new-user-manager">
-					<!-- TRANSLATORS This string describes a manager in the context of an organization -->
-					{{ t('settings', 'Manager') }}
-				</label>
-				<NcSelect v-model="newUser.manager"
-					class="modal__select"
-					input-id="new-user-manager"
-					:placeholder="managerLabel"
-					:options="possibleManagers"
-					:user-select="true"
-					label="displayname"
-					@search="searchUserManager" />
-			</div>
-			<NcButton class="modal__submit"
+			<NcTextField
+				class="modal__item"
+				data-test="displayName"
+				:value.sync="newUser.adminUser"
+				label="管理员账号 (必填)"
+				:label-visible="true"
+				autocapitalize="none"
+				autocomplete="off"
+				autocorrect="off"
+				required
+			/>
+			<NcTextField
+				class="modal__item"
+				data-test="displayName"
+				:value.sync="newUser.adminDisplayname"
+				label="管理员显示名称"
+				:label-visible="true"
+				autocapitalize="none"
+				autocomplete="off"
+				autocorrect="off"
+			/>
+			<NcPasswordField
+				class="modal__item"
+				data-test="displayName"
+				:value.sync="newUser.adminPassword"
+				label="管理员密码 (必填)"
+				:label-visible="true"
+				autocapitalize="none"
+				autocomplete="off"
+				autocorrect="off"
+				required
+			/>
+			<NcButton
+				class="modal__submit"
 				data-test="submit"
 				type="primary"
-				native-type="submit">
+				native-type="submit"
+			>
 				添加新公司
 			</NcButton>
 		</form>
@@ -131,14 +146,14 @@
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
+import NcButton from "@nextcloud/vue/dist/Components/NcButton.js";
+import NcModal from "@nextcloud/vue/dist/Components/NcModal.js";
+import NcPasswordField from "@nextcloud/vue/dist/Components/NcPasswordField.js";
+import NcSelect from "@nextcloud/vue/dist/Components/NcSelect.js";
+import NcTextField from "@nextcloud/vue/dist/Components/NcTextField.js";
 
 export default {
-	name: 'NewUserModal',
+	name: "NewUserModal",
 
 	components: {
 		NcButton,
@@ -169,99 +184,106 @@ export default {
 		return {
 			possibleManagers: [],
 			// TRANSLATORS This string describes a manager in the context of an organization
-			managerLabel: t('settings', 'Set user manager'),
-		}
+			managerLabel: t("settings", "Set user manager"),
+		};
 	},
 
 	computed: {
 		showConfig() {
-			return this.$store.getters.getShowConfig
+			return this.$store.getters.getShowConfig;
 		},
 
 		settings() {
-			return this.$store.getters.getServerData
+			return this.$store.getters.getServerData;
 		},
 
 		usernameLabel() {
 			if (this.settings.newUserGenerateUserID) {
-				return t('settings', 'Username will be autogenerated')
+				return t("settings", "Username will be autogenerated");
 			}
-			return t('settings', 'Username (required)')
+			return t("settings", "Username (required)");
 		},
 
 		minPasswordLength() {
-			return this.$store.getters.getPasswordPolicyMinLength
+			return this.$store.getters.getPasswordPolicyMinLength;
 		},
 
 		groups() {
 			// data provided php side + remove the disabled group
 			return this.$store.getters.getGroups
-				.filter(group => group.id !== 'disabled')
-				.sort((a, b) => a.name.localeCompare(b.name))
+				.filter((group) => group.id !== "disabled")
+				.sort((a, b) => a.name.localeCompare(b.name));
 		},
 
 		subAdminsGroups() {
 			// data provided php side
-			return this.$store.getters.getSubadminGroups
+			return this.$store.getters.getSubadminGroups;
 		},
 
 		canAddGroups() {
 			// disabled if no permission to add new users to group
-			return this.groups.map(group => {
+			return this.groups.map((group) => {
 				// clone object because we don't want
 				// to edit the original groups
-				group = Object.assign({}, group)
-				group.$isDisabled = group.canAdd === false
-				return group
-			})
+				group = Object.assign({}, group);
+				group.$isDisabled = group.canAdd === false;
+				return group;
+			});
 		},
 
 		languages() {
 			return [
 				{
-					name: t('settings', 'Common languages'),
+					name: t("settings", "Common languages"),
 					languages: this.settings.languages.commonLanguages,
 				},
 				...this.settings.languages.commonLanguages,
 				{
-					name: t('settings', 'Other languages'),
+					name: t("settings", "Other languages"),
 					languages: this.settings.languages.otherLanguages,
 				},
 				...this.settings.languages.otherLanguages,
-			]
+			];
 		},
 	},
 
 	async beforeMount() {
-		await this.searchUserManager()
+		await this.searchUserManager();
 	},
 
 	methods: {
-		async createUser() {
-			this.loading.all = true
+		async createCompany() {
+			this.loading.all = true;
 			try {
-				await this.$store.dispatch('addUser', {
-					userid: this.newUser.id,
+				await this.$store.dispatch("addCompany", {
+					companyId: this.newUser.id,
 					password: this.newUser.password,
 					displayName: this.newUser.displayName,
 					email: this.newUser.mailAddress,
 					language: this.newUser.language.code,
-					manager: this.newUser.manager.id,
-				})
+					adminUser: this.newUser.adminUser,
+					adminDisplayname: this.newUser.adminDisplayname,
+					adminPassword: this.newUser.adminPassword,
+				});
 
-				this.$emit('reset')
-				this.$refs.username?.$refs?.inputField?.$refs?.input?.focus?.()
-				this.$emit('close')
+				this.$emit("reset");
+				this.$refs.username?.$refs?.inputField?.$refs?.input?.focus?.();
+				this.$emit("close");
 			} catch (error) {
-				this.loading.all = false
-				if (error.response && error.response.data && error.response.data.ocs && error.response.data.ocs.meta) {
-					const statuscode = error.response.data.ocs.meta.statuscode
+				this.loading.all = false;
+				if (
+					error.response &&
+					error.response.data &&
+					error.response.data.ocs &&
+					error.response.data.ocs.meta
+				) {
+					const statuscode = error.response.data.ocs.meta.statuscode;
 					if (statuscode === 102) {
 						// wrong username
-						this.$refs.username?.$refs?.inputField?.$refs?.input?.focus?.()
+						this.$refs.username?.$refs?.inputField?.$refs?.input?.focus?.();
 					} else if (statuscode === 107) {
 						// wrong password
-						this.$refs.password?.$refs?.inputField?.$refs?.input?.focus?.()
+						this.$refs.password?.$refs?.inputField?.$refs?.input?.focus?.();
 					}
 				}
 			}
@@ -273,7 +295,7 @@ export default {
 			 *
 			 * Created groups are added programmatically by `createGroup()`
 			 */
-			 this.newUser.groups = groups.filter(group => Boolean(group.id))
+			this.newUser.groups = groups.filter((group) => Boolean(group.id));
 		},
 
 		/**
@@ -283,13 +305,13 @@ export default {
 		 * @param {string} group.name Group id
 		 */
 		async createGroup({ name: gid }) {
-			this.loading.groups = true
+			this.loading.groups = true;
 			try {
-				await this.$store.dispatch('addGroup', gid)
-				this.newUser.groups.push(this.groups.find(group => group.id === gid))
-				this.loading.groups = false
+				await this.$store.dispatch("addGroup", gid);
+				this.newUser.groups.push(this.groups.find((group) => group.id === gid));
+				this.loading.groups = false;
 			} catch (error) {
-				this.loading.groups = false
+				this.loading.groups = false;
 			}
 		},
 
@@ -301,46 +323,49 @@ export default {
 		 */
 		validateQuota(quota) {
 			// only used for new presets sent through @Tag
-			const validQuota = OC.Util.computerFileSize(quota)
+			const validQuota = OC.Util.computerFileSize(quota);
 			if (validQuota !== null && validQuota >= 0) {
 				// unify format output
-				quota = OC.Util.humanFileSize(OC.Util.computerFileSize(quota))
-				this.newUser.quota = { id: quota, label: quota }
-				return this.newUser.quota
+				quota = OC.Util.humanFileSize(OC.Util.computerFileSize(quota));
+				this.newUser.quota = { id: quota, label: quota };
+				return this.newUser.quota;
 			}
 			// Default is unlimited
-			this.newUser.quota = this.quotaOptions[0]
-			return this.quotaOptions[0]
+			this.newUser.quota = this.quotaOptions[0];
+			return this.quotaOptions[0];
 		},
 
 		languageFilterBy(option, label, search) {
 			// Show group header of the language
 			if (option.languages) {
-				return option.languages.some(
-					({ name }) => name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-				)
+				return option.languages.some(({ name }) =>
+					name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+				);
 			}
 
-			return (label || '').toLocaleLowerCase().includes(search.toLocaleLowerCase())
+			return (label || "")
+				.toLocaleLowerCase()
+				.includes(search.toLocaleLowerCase());
 		},
 
 		async searchUserManager(query) {
-			await this.$store.dispatch(
-				'searchUsers',
-				{
+			await this.$store
+				.dispatch("searchUsers", {
 					offset: 0,
 					limit: 10,
 					search: query,
-				},
-			).then(response => {
-				const users = response?.data ? Object.values(response?.data.ocs.data.users) : []
-				if (users.length > 0) {
-					this.possibleManagers = users
-				}
-			})
+				})
+				.then((response) => {
+					const users = response?.data
+						? Object.values(response?.data.ocs.data.users)
+						: [];
+					if (users.length > 0) {
+						this.possibleManagers = users;
+					}
+				});
 		},
 	},
-}
+};
 </script>
 
 <style lang="scss" scoped>

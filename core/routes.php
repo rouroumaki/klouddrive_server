@@ -62,7 +62,7 @@ $application->registerRoutes($this, [
 		['name' => 'company#addUser', 'url' => '/company/adduser', 'verb' => 'POST'],
 		['name' => 'company#removeUser', 'url' => '/company/removeuser', 'verb' => 'POST'],
 		['name' => 'company#search', 'url' => '/companylist', 'verb' => 'GET'],
-		['name' => 'company#companyList', 'url' => '/companies', 'verb' => 'GET'],
+		// ['name' => 'company#companyList', 'url' => '/companies', 'verb' => 'GET'],
 
 		// Original login flow used by all clients
 		['name' => 'ClientFlowLogin#showAuthPickerPage', 'url' => '/login/flow', 'verb' => 'GET'],

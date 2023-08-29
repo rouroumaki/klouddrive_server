@@ -31,7 +31,7 @@
 					@keyup.enter="showNewCompanyMenu"
 					@keyup.space="showNewCompanyMenu" />
 
-				<template #footer>
+				<!-- <template #footer>
 					<ul class="app-navigation-entry__settings">
 						<NcAppNavigationItem :name="t('settings', 'User management settings')"
 							@click="isDialogOpen = true">
@@ -40,7 +40,7 @@
 							</template>
 						</NcAppNavigationItem>
 					</ul>
-				</template>
+				</template> -->
 			</NcAppNavigation>
 
 			<NcAppContent>
@@ -49,7 +49,7 @@
 			</NcAppContent>
 		</NcContent>
 
-		<UserSettingsDialog :open.sync="isDialogOpen" />
+		<!-- <UserSettingsDialog :open.sync="isDialogOpen" /> -->
 	</Fragment>
 </template>
 

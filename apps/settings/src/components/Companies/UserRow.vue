@@ -30,14 +30,14 @@
 				:name="t('settings', 'Loading user …')"
 				:size="32" />
 			<NcAvatar v-else
-				:key="user.cid"
+				:key="user.id"
 				disable-menu
 				:show-user-status="false"
-				:user="user.cid" /> -->
-			<div class="avator-wrapper">{{ user.cid.slice(0,1) }}</div>
+				:user="user.id" /> -->
+			<div class="avator-wrapper">{{ user.id.slice(0,1) }}</div>
 		</td>
 
-		<td class="row__cell row__cell--displayname" :data-test="user.cid">
+		<td class="row__cell row__cell--displayname" :data-test="user.id" @click.stop="handleGoUser(user.id)">
 			<template v-if="user.display">
 				<strong
 					v-if="!isObfuscated"
@@ -45,10 +45,10 @@
 				>
 					{{ user.display }}
 				</strong>
-				<span class="row__subtitle">{{ user.cid }}</span>
+				<span class="row__subtitle">{{ user.id }}</span>
 			</template>
 			<template v-else>
-				<span>{{ user.cid }}</span>
+				<span>{{ user.id }}</span>
 			</template>
 			<!-- <template
 				v-if="idState.editing && user.backendCapabilities.setDisplayName"
@@ -81,7 +81,7 @@
 				>
 					{{ user.displayname }}
 				</strong>
-				<span class="row__subtitle">{{ user.cid }}</span>
+				<span class="row__subtitle">{{ user.id }}</span>
 			</template> -->
 		</td>
 
@@ -126,7 +126,7 @@
 			</span>
 		</td>
 
-		<td class="row__cell">
+		<!-- <td class="row__cell">
 			<template v-if="idState.editing">
 				<label class="hidden-visually" :for="'mailAddress' + uniqueId">
 					{{ t("settings", "Add new email address") }}
@@ -154,39 +154,7 @@
 			>
 				{{ user.email }}
 			</span>
-		</td>
-
-		<td class="row__cell row__cell--large row__cell--multiline">
-			<template v-if="idState.editing">
-				<label class="hidden-visually" :for="'groups' + uniqueId">
-					{{ t("settings", "Add user to group") }}
-				</label>
-				<NcSelect
-					:input-id="'groups' + uniqueId"
-					:close-on-select="false"
-					:disabled="isLoadingField"
-					:loading="idState.loading.groups"
-					:multiple="true"
-					:options="availableGroups"
-					:placeholder="t('settings', 'Add user to group')"
-					:taggable="settings.isAdmin"
-					:value="userGroups"
-					class="select-vue"
-					label="name"
-					:no-wrap="true"
-					:create-option="(value) => ({ name: value, isCreating: true })"
-					@option:created="createGroup"
-					@option:selected="(options) => addUserGroup(options.at(-1))"
-					@option:deselected="removeUserGroup"
-				/>
-			</template>
-			<span
-				v-else-if="!isObfuscated"
-				:title="userGroupsLabels?.length > 40 ? userGroupsLabels : null"
-			>
-				{{ userGroupsLabels }}
-			</span>
-		</td>
+		</td> -->
 
 		<!-- <td class="row__cell">
 			<template v-if="idState.editing">
@@ -217,7 +185,7 @@
 					:value="usedQuota" />
 			</template>
 		</td> -->
-
+<!-- 
 		<td
 			v-if="showConfig.showLanguages"
 			class="row__cell row__cell--large"
@@ -269,9 +237,9 @@
 			data-test="lastLogin"
 		>
 			<span v-if="!isObfuscated">{{ userLastLogin }}</span>
-		</td>
+		</td> -->
 
-		<td class="row__cell row__cell--large">
+		<!-- <td class="row__cell row__cell--large">
 			<template v-if="idState.editing">
 				<label class="hidden-visually" :for="'manager' + uniqueId">
 					{{ managerLabel }}
@@ -294,12 +262,12 @@
 			<span v-else-if="!isObfuscated">
 				{{ user.manager }}
 			</span>
-		</td>
+		</td> -->
 
 		<td class="row__cell row__cell--actions">
 			<UserRowActions
 				v-if="!isObfuscated && canEdit && !idState.loading.all"
-				:actions="userActions"
+				:actions="companyActions"
 				:disabled="isLoadingField"
 				:edit="idState.editing"
 				@update:edit="toggleEdit"
@@ -345,9 +313,9 @@ export default {
 		 * See https://github.com/Akryum/vue-virtual-scroller/tree/v1/packages/vue-virtual-scroller#why-is-this-useful
 		 */
 		IdState({
-			idProp: (vm) => vm.user.cid,
+			idProp: (vm) => vm.user.id,
 		}),
-		UserRowMixin,
+		// UserRowMixin,
 	],
 
 	props: {
@@ -443,11 +411,7 @@ export default {
 		},
 
 		uniqueId() {
-			return this.user.cid + this.idState.rand;
-		},
-
-		userGroupsLabels() {
-			return this.userGroups.map((group) => group.name).join(", ");
+			return this.user.id + this.idState.rand;
 		},
 
 		usedSpace() {
@@ -460,7 +424,7 @@ export default {
 		},
 
 		canEdit() {
-			return getCurrentUser().uid !== this.user.cid || this.settings.isAdmin;
+			return getCurrentUser().uid !== this.user.id || this.settings.isAdmin;
 		},
 
 		userQuota() {
@@ -483,33 +447,14 @@ export default {
 			return OC.Util.humanFileSize(0);
 		},
 
-		userActions() {
+		companyActions() {
 			const actions = [
 				{
 					icon: "icon-delete",
-					text: t("settings", "Delete user"),
+					text: '删除公司',
 					action: this.deleteUser,
 				},
-				{
-					icon: "icon-delete",
-					text: t("settings", "Wipe all devices"),
-					action: this.wipeUserDevices,
-				},
-				{
-					icon: this.user.enabled ? "icon-close" : "icon-add",
-					text: this.user.enabled
-						? t("settings", "Disable user")
-						: t("settings", "Enable user"),
-					action: this.enableDisableUser,
-				},
 			];
-			if (this.user.email !== null && this.user.email !== "") {
-				actions.push({
-					icon: "icon-mail",
-					text: t("settings", "Resend welcome email"),
-					action: this.sendWelcomeMail,
-				});
-			}
 			return actions.concat(this.externalActions);
 		},
 
@@ -550,8 +495,11 @@ export default {
 	},
 
 	methods: {
+		handleGoUser(id) {
+			this.$router.push({name:'users',query:{companyId:id}})
+		},
 		wipeUserDevices() {
-			const userid = this.user.cid;
+			const userid = this.user.id;
 			OC.dialogs.confirmDestructive(
 				t(
 					"settings",
@@ -589,7 +537,7 @@ export default {
 		},
 
 		filterManagers(managers) {
-			return managers.filter((manager) => manager.id !== this.user.cid);
+			return managers.filter((manager) => manager.id !== this.user.id);
 		},
 
 		async initManager(userId) {
@@ -618,7 +566,7 @@ export default {
 			this.idState.loading.manager = true;
 			try {
 				await this.$store.dispatch("setUserData", {
-					userid: this.user.cid,
+					userid: this.user.id,
 					key: "manager",
 					value: this.idState.currentManager
 						? this.idState.currentManager.id
@@ -634,7 +582,7 @@ export default {
 		},
 
 		deleteUser() {
-			const userid = this.user.cid;
+			const userid = this.user.id;
 			OC.dialogs.confirmDestructive(
 				t(
 					"settings",
@@ -652,7 +600,7 @@ export default {
 					if (result) {
 						this.idState.loading.delete = true;
 						this.idState.loading.all = true;
-						return this.$store.dispatch("deleteUser", userid).then(() => {
+						return this.$store.dispatch("deleteCompany", userid).then(() => {
 							this.idState.loading.delete = false;
 							this.idState.loading.all = false;
 						});
@@ -665,7 +613,7 @@ export default {
 		enableDisableUser() {
 			this.idState.loading.delete = true;
 			this.idState.loading.all = true;
-			const userid = this.user.cid;
+			const userid = this.user.id;
 			const enabled = !this.user.enabled;
 			return this.$store
 				.dispatch("enableDisableUser", {
@@ -687,7 +635,7 @@ export default {
 			this.idState.loading.displayName = true;
 			this.$store
 				.dispatch("setUserData", {
-					userid: this.user.cid,
+					userid: this.user.id,
 					key: "displayname",
 					value: this.idState.editedDisplayName,
 				})
@@ -712,7 +660,7 @@ export default {
 			} else {
 				this.$store
 					.dispatch("setUserData", {
-						userid: this.user.cid,
+						userid: this.user.id,
 						key: "password",
 						value: this.idState.editedPassword,
 					})
@@ -738,7 +686,7 @@ export default {
 			} else {
 				this.$store
 					.dispatch("setUserData", {
-						userid: this.user.cid,
+						userid: this.user.id,
 						key: "email",
 						value: this.idState.editedMail,
 					})
@@ -760,7 +708,7 @@ export default {
 			this.idState.loading = { groups: true, subadmins: true };
 			try {
 				await this.$store.dispatch("addGroup", gid);
-				const userid = this.user.cid;
+				const userid = this.user.id;
 				await this.$store.dispatch("addUserGroup", { userid, gid });
 			} catch (error) {
 				console.error(error);
@@ -782,7 +730,7 @@ export default {
 				return;
 			}
 			this.idState.loading.groups = true;
-			const userid = this.user.cid;
+			const userid = this.user.id;
 			const gid = group.id;
 			if (group.canAdd === false) {
 				return false;
@@ -806,7 +754,7 @@ export default {
 				return false;
 			}
 			this.idState.loading.groups = true;
-			const userid = this.user.cid;
+			const userid = this.user.id;
 			const gid = group.id;
 			try {
 				await this.$store.dispatch("removeUserGroup", {
@@ -830,7 +778,7 @@ export default {
 		 */
 		async addUserSubAdmin(group) {
 			this.idState.loading.subadmins = true;
-			const userid = this.user.cid;
+			const userid = this.user.id;
 			const gid = group.id;
 			try {
 				await this.$store.dispatch("addUserSubAdmin", {
@@ -850,7 +798,7 @@ export default {
 		 */
 		async removeUserSubAdmin(group) {
 			this.idState.loading.subadmins = true;
-			const userid = this.user.cid;
+			const userid = this.user.id;
 			const gid = group.id;
 
 			try {
@@ -882,7 +830,7 @@ export default {
 
 			try {
 				await this.$store.dispatch("setUserData", {
-					userid: this.user.cid,
+					userid: this.user.id,
 					key: "quota",
 					value: quota,
 				});
@@ -926,7 +874,7 @@ export default {
 			// ensure we only send the preset id
 			try {
 				await this.$store.dispatch("setUserData", {
-					userid: this.user.cid,
+					userid: this.user.id,
 					key: "language",
 					value: lang.code,
 				});
@@ -943,7 +891,7 @@ export default {
 		sendWelcomeMail() {
 			this.idState.loading.all = true;
 			this.$store
-				.dispatch("sendWelcomeMail", this.user.cid)
+				.dispatch("sendWelcomeMail", this.user.id)
 				.then(() =>
 					showSuccess(t("setting", "Welcome mail sent!"), { timeout: 2000 })
 				)

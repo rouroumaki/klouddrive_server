@@ -42,29 +42,20 @@
 			scope="col">
 			<span>{{ passwordLabel }}</span>
 		</th>
-		<th class="header__cell"
+		<!-- <th class="header__cell"
 			scope="col">
 			<span>{{ t('settings', 'Email') }}</span>
-		</th>
-		<th class="header__cell header__cell--large"
-			scope="col">
-			<span>{{ t('settings', 'Groups') }}</span>
-		</th>
-		<th v-if="subAdminsGroups.length > 0 && settings.isAdmin"
-			class="header__cell header__cell--large"
-			scope="col">
-			<span>{{ t('settings', 'Group admin for') }}</span>
-		</th>
-		<th class="header__cell"
+		</th> -->
+		<!-- <th class="header__cell"
 			scope="col">
 			<span>{{ t('settings', 'Quota') }}</span>
-		</th>
-		<th v-if="showConfig.showLanguages"
+		</th> -->
+		<!-- <th v-if="showConfig.showLanguages"
 			class="header__cell header__cell--large"
 			scope="col">
 			<span>{{ t('settings', 'Language') }}</span>
-		</th>
-		<th v-if="showConfig.showUserBackend || showConfig.showStoragePath"
+		</th> -->
+		<!-- <th v-if="showConfig.showUserBackend || showConfig.showStoragePath"
 			class="header__cell header__cell--large"
 			scope="col">
 			<span v-if="showConfig.showUserBackend">
@@ -79,12 +70,11 @@
 			class="header__cell"
 			scope="col">
 			<span>{{ t('settings', 'Last login') }}</span>
-		</th>
-		<th class="header__cell header__cell--large"
+		</th> -->
+		<!-- <th class="header__cell header__cell--large"
 			scope="col">
-			<!-- TRANSLATORS This string describes a manager in the context of an organization -->
 			<span>{{ t('settings', 'Manager') }}</span>
-		</th>
+		</th> -->
 		<th class="header__cell header__cell--actions"
 			scope="col">
 			<span class="hidden-visually">

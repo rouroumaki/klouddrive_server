@@ -283,6 +283,134 @@ class UsersController extends Controller {
 		return new TemplateResponse('settings', 'settings-vue', ['serverData' => $serverData, 'pageTitle' => $this->l10n->t('Users')]);
 	}
 
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 *
+	 * Display users list template
+	 *
+	 * @return TemplateResponse
+	 */
+	public function companyList(): TemplateResponse {
+		$user = $this->userSession->getUser();
+		$uid = $user->getUID();
+
+		\OC::$server->getNavigationManager()->setActiveEntry('core_users');
+
+		/* SORT OPTION: SORT_USERCOUNT or SORT_GROUPNAME */
+		$sortGroupsBy = \OC\Group\MetaData::SORT_USERCOUNT;
+		$isLDAPUsed = false;
+		if ($this->config->getSystemValue('sort_groups_by_name', false)) {
+			$sortGroupsBy = \OC\Group\MetaData::SORT_GROUPNAME;
+		} else {
+			if ($this->appManager->isEnabledForUser('user_ldap')) {
+				$isLDAPUsed =
+					$this->groupManager->isBackendUsed('\OCA\User_LDAP\Group_Proxy');
+				if ($isLDAPUsed) {
+					// LDAP user count can be slow, so we sort by group name here
+					$sortGroupsBy = \OC\Group\MetaData::SORT_GROUPNAME;
+				}
+			}
+		}
+
+		$canChangePassword = $this->canAdminChangeUserPasswords();
+
+		/* GROUPS */
+		$groupsInfo = new \OC\Group\MetaData(
+			$uid,
+			$this->isAdmin,
+			$this->groupManager,
+			$this->userSession
+		);
+
+		$groupsInfo->setSorting($sortGroupsBy);
+		[$adminGroup, $groups] = $groupsInfo->get();
+
+		if (!$isLDAPUsed && $this->appManager->isEnabledForUser('user_ldap')) {
+			$isLDAPUsed = (bool)array_reduce($this->userManager->getBackends(), function ($ldapFound, $backend) {
+				return $ldapFound || $backend instanceof User_Proxy;
+			});
+		}
+
+		$disabledUsers = -1;
+		$userCount = 0;
+
+		if (!$isLDAPUsed) {
+			if ($this->isAdmin) {
+				$disabledUsers = $this->userManager->countDisabledUsers();
+				$userCount = array_reduce($this->userManager->countUsers(), function ($v, $w) {
+					return $v + (int)$w;
+				}, 0);
+			} else {
+				// User is subadmin !
+				// Map group list to names to retrieve the countDisabledUsersOfGroups
+				$userGroups = $this->groupManager->getUserGroups($user);
+				$groupsNames = [];
+
+				foreach ($groups as $key => $group) {
+					// $userCount += (int)$group['usercount'];
+					array_push($groupsNames, $group['name']);
+					// we prevent subadmins from looking up themselves
+					// so we lower the count of the groups he belongs to
+					if (array_key_exists($group['id'], $userGroups)) {
+						$groups[$key]['usercount']--;
+						$userCount -= 1; // we also lower from one the total count
+					}
+				}
+				$userCount += $this->userManager->countUsersOfGroups($groupsInfo->getGroups());
+				$disabledUsers = $this->userManager->countDisabledUsersOfGroups($groupsNames);
+			}
+
+			$userCount -= $disabledUsers;
+		}
+
+		$disabledUsersGroup = [
+			'id' => 'disabled',
+			'name' => 'Disabled users',
+			'usercount' => $disabledUsers
+		];
+
+		/* QUOTAS PRESETS */
+		$quotaPreset = $this->parseQuotaPreset($this->config->getAppValue('files', 'quota_preset', '1 GB, 5 GB, 10 GB'));
+		$allowUnlimitedQuota = $this->config->getAppValue('files', 'allow_unlimited_quota', '1') === '1';
+		if (!$allowUnlimitedQuota && count($quotaPreset) > 0) {
+			$defaultQuota = $this->config->getAppValue('files', 'default_quota', $quotaPreset[0]);
+		} else {
+			$defaultQuota = $this->config->getAppValue('files', 'default_quota', 'none');
+		}
+
+		$event = new BeforeTemplateRenderedEvent();
+		$this->dispatcher->dispatch('OC\Settings\Users::loadAdditionalScripts', $event);
+		$this->dispatcher->dispatchTyped($event);
+
+		/* LANGUAGES */
+		$languages = $this->l10nFactory->getLanguages();
+
+		/* FINAL DATA */
+		$serverData = [];
+		// groups
+		$serverData['groups'] = array_merge_recursive($adminGroup, [$disabledUsersGroup], $groups);
+		// Various data
+		$serverData['isAdmin'] = $this->isAdmin;
+		$serverData['sortGroups'] = $sortGroupsBy;
+		$serverData['quotaPreset'] = $quotaPreset;
+		$serverData['allowUnlimitedQuota'] = $allowUnlimitedQuota;
+		$serverData['userCount'] = $userCount;
+		$serverData['languages'] = $languages;
+		$serverData['defaultLanguage'] = $this->config->getSystemValue('default_language', 'en');
+		$serverData['forceLanguage'] = $this->config->getSystemValue('force_language', false);
+		// Settings
+		$serverData['defaultQuota'] = $defaultQuota;
+		$serverData['canChangePassword'] = $canChangePassword;
+		$serverData['newUserGenerateUserID'] = $this->config->getAppValue('core', 'newUser.generateUserID', 'no') === 'yes';
+		$serverData['newUserRequireEmail'] = $this->config->getAppValue('core', 'newUser.requireEmail', 'no') === 'yes';
+		$serverData['newUserSendEmail'] = $this->config->getAppValue('core', 'newUser.sendEmail', 'yes') === 'yes';
+
+		return new TemplateResponse('settings', 'settings-vue', ['serverData' => $serverData, 'pageTitle' => $this->l10n->t('Users')]);
+	}
+
+
 	/**
 	 * @param string $key
 	 * @param string $value
