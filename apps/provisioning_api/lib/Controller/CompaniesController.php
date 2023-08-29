@@ -223,7 +223,7 @@ class CompaniesController extends AUserData {
 
 		// Check it exists
 		if (!$this->companyManager->companyExists($companyid)) {
-			throw new OCSException('', 101);
+			throw new OCSException('Company does not exist.', 101);
 		}
         
         $this->companyManager->get($companyid)->delete();
