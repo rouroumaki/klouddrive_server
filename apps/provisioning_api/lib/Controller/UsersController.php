@@ -1573,16 +1573,16 @@ class UsersController extends AUserData {
 		$company = $this->companyManager->get($companyid);
 		$targetUser = $this->userManager->get($userId);
 		if ($company === null) {
-			throw new OCSException('', 102);
+			throw new OCSException('Company does not exist', 102);
 		}
 		if ($targetUser === null) {
-			throw new OCSException('', 103);
+			throw new OCSException('User does not exists', 103);
 		}
 
 		$loggedInUser = $this->userSession->getUser();
 		$subAdminManager = $this->companyManager->getSubAdmin();
-		if (!$subAdminManager->isSubAdminOfCompany($loggedInUser, $company)) {
-			throw new OCSException('', 104);
+		if (!$this->groupManager->isAdmin($loggedInUser->getUID()) && !$subAdminManager->isSubAdminOfCompany($loggedInUser, $company)) {
+			throw new OCSException('Not admin of this company.', 104);
 		}
 
 		$company->addUser($targetUser);
@@ -1617,13 +1617,12 @@ class UsersController extends AUserData {
 			throw new OCSException('Not found the user', 103);
 		}
 
-		
 		$subAdminManager = $this->companyManager->getSubAdmin();
-		if (!$subAdminManager->isSubAdminOfCompany($loggedInUser, $company)) {
+		if (!$this->groupManager->isAdmin($loggedInUser->getUID()) && !$subAdminManager->isSubAdminOfCompany($loggedInUser, $company)) {
 			throw new OCSException('Not admin of the company.', 104);
 		}
 
-		if ($targetUser->getUID() === $loggedInUser->getUID()) {
+		if (false && $targetUser->getUID() === $loggedInUser->getUID()) {
 			throw new OCSException('Cannot remove yourself from this company as you are Admin of the company', 105);
 		} else{
 			$company->removeUser($targetUser);
@@ -1675,6 +1674,8 @@ class UsersController extends AUserData {
 	 * @throws OCSException
 	 */
 	public function removeCompanyAdmin(string $userId, string $companyid): DataResponse {
+		$loggedInUser = $this->userSession->getUser();
+	
 		$company = $this->companyManager->get($companyid);
 		$user = $this->userManager->get($userId);
 		$subAdminManager = $this->companyManager->getSubAdmin();
@@ -1685,8 +1686,8 @@ class UsersController extends AUserData {
 		if ($company === null) {
 			throw new OCSException('Company does not exist', 101);
 		}
-		if (!$subAdminManager->isSubAdminOfCompany($user, $company)) {
-			throw new OCSException('User is not a subadmin of this group', 102);
+		if (!$this->groupManager->isAdmin($user->getUID()) && !$subAdminManager->isSubAdminOfCompany($user, $company)) {
+			throw new OCSException('User is not an admin of this company', 102);
 		}
 
 		$subAdminManager->deleteSubAdmin($user, $company);

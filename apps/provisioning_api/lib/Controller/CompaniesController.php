@@ -143,7 +143,7 @@ class CompaniesController extends AUserData {
 			throw new OCSException('The requested company could not be found', OCSController::RESPOND_NOT_FOUND);
         }
 
-		if ($isSubadminOfCompany){
+		if ($this->groupManager->isAdmin($user->getUID()) || $isSubadminOfCompany) {
 			$users = $company->searchUsers($search, $limit, $offset);
 
 			$usersDetails = [];
@@ -178,7 +178,7 @@ class CompaniesController extends AUserData {
 	 * @return DataResponse<Http::STATUS_OK, array<empty>, array{}>
 	 * @throws OCSException
 	 */
-	public function addCompany(string $companyid, string $displayname = '', string $pwd = ''): DataResponse {
+	public function addCompany(string $companyid, string $displayname = '', string $pwd = '', string $adminid='', string $adminname='', string $adminpwd=''): DataResponse {
 		// Validate name
 		if (empty($companyid)) {
 			$this->logger->error('Company name not supplied', ['app' => 'provisioning_api']);
@@ -186,12 +186,25 @@ class CompaniesController extends AUserData {
 		}
 		
 		if ($this->companyManager->companyExists($companyid)) {
-			throw new OCSException('group exists', 102);
+			throw new OCSException('company exists', 102);
 		}
 		$company = $this->companyManager->createCompany($companyid, $displayname);
 		if ($company === null) {
 			throw new OCSException('Not supported by backend', 103);
 		}
+
+		if ($adminid !== ''){
+
+			$adminuser = $this->userManager->createUser($adminid, $adminpwd);
+			$company->addUser($adminuser);
+			$this->companyManager->getSubAdmin()->createSubAdmin($adminuser, $company);
+		}
+		else{
+			$user = $this->userSession->getUser();
+			$company->addUser($user);
+			$this->companyManager->getSubAdmin()->createSubAdmin($user, $company);
+		}
+
 		return new DataResponse();
 	}
     
