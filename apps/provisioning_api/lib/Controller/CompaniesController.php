@@ -178,7 +178,7 @@ class CompaniesController extends AUserData {
 	 * @return DataResponse<Http::STATUS_OK, array<empty>, array{}>
 	 * @throws OCSException
 	 */
-	public function addCompany(string $companyid, string $displayname = '', string $pwd = '', string $adminid='', string $adminname='', string $adminpwd=''): DataResponse {
+	public function createCompany(string $companyid, string $displayname = '', string $pwd = '', string $adminid='', string $adminname='', string $adminpwd=''): DataResponse {
 		// Validate name
 		if (empty($companyid)) {
 			$this->logger->error('Company name not supplied', ['app' => 'provisioning_api']);
