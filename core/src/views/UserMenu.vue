@@ -73,7 +73,6 @@ export default {
 
 	mounted() {
 		axios.get(generateOcsUrl(`cloud/users/${this.userId}/companies`)).then(res => {
-			console.log(res);
 			console.log(res.data.ocs.data);
 		})
 		// fetch().then(res => res.json()).then(res => {
