@@ -51,6 +51,7 @@ import NcHeaderMenu from '@nextcloud/vue/dist/Components/NcHeaderMenu.js'
 
 import UserMenuEntry from '../components/UserMenu/UserMenuEntry.vue'
 import axios from '@nextcloud/axios'
+import { generateOcsUrl } from '@nextcloud/router'
 
 const settingsNavEntries = loadState('core', 'settingsNavEntries', [])
 
@@ -71,7 +72,7 @@ export default {
 	},
 
 	mounted() {
-		axios.get(location.origin + `/ocs/v2.php/cloud/users/${this.userId}/companies`).then(res => {
+		axios.get(generateOcsUrl(`cloud/users/${this.userId}/companies`)).then(res => {
 			console.log(res);
 			console.log(res.data.ocs.data);
 			debugger

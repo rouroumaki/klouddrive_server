@@ -28,7 +28,7 @@
 
 import api from './api.js'
 import axios from '@nextcloud/axios'
-import { generateOcsUrl,generateUrl } from '@nextcloud/router'
+import { generateOcsUrl } from '@nextcloud/router'
 import logger from '../logger.js'
 
 const orderGroups = function(groups, orderBy) {
