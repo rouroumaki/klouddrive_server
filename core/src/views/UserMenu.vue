@@ -84,7 +84,11 @@ export default {
 		// 	console.log(err)
 		// })
 		this.$set(this.settingsNavEntries.core_users, 'name', '公司')
-		this.$set(this.settingsNavEntries.core_users, 'href', '/index.php/settings/companies')
+		if (this.settingsNavEntries.core_users?.href) {
+			const index = this.settingsNavEntries.core_users.href.lastIndexOf('/')
+			const newHref = this.settingsNavEntries.core_users.href.slice(0, index+1) + 'companies'
+			this.$set(this.settingsNavEntries.core_users, 'href', newHref)
+		}
 		// console.log(this.settingsNavEntries);
 		// debugger
 		emit('core:user-menu:mounted')
