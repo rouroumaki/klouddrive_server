@@ -100,10 +100,14 @@ class Application extends App implements IBootstrap {
 		$context->registerService('isSubAdmin', function () {
 			$userObject = \OC::$server->getUserSession()->getUser();
 			$isSubAdmin = false;
+			
+			$isCompanyAdmin = false;
+			$isGroupAdmin = false;
 			if ($userObject !== null) {
+				$isCompanyAdmin = \OC::$server->getCompanyManager()->getSubAdmin()->isSubAdmin($userObject);
 				$isSubAdmin = \OC::$server->getGroupManager()->getSubAdmin()->isSubAdmin($userObject);
 			}
-			return $isSubAdmin;
+			return $isCompanyAdmin || $isGroupAdmin;
 		});
 		$context->registerService(IProvider::class, function (IAppContainer $appContainer) {
 			/** @var IServerContainer $serverContainer */

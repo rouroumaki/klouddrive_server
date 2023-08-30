@@ -1538,7 +1538,7 @@ class UsersController extends AUserData {
 		} else {
 			$subAdminManager = $this->companyManager->getSubAdmin();
 
-			if ($subAdminManager->isUserAccessible($loggedInUser, $targetUser)) {
+			if ($this->groupManager->isAdmin($loggedInUser->getUID()) || $subAdminManager->isUserAccessible($loggedInUser, $targetUser)) {
 				$getSubAdminsCompanies = $subAdminManager->getSubAdminsCompanies($loggedInUser);
 				foreach ($getSubAdminsCompanies as $key => $company) {
 					$getSubAdminsCompanies[$key] = $company->getCID();

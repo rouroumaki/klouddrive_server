@@ -32,4 +32,6 @@ interface ICompany {
 
 	public function canAddUser();
 
+	
+
 }

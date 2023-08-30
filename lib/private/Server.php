@@ -1621,6 +1621,13 @@ class Server extends ServerContainer implements IServerContainer {
 	}
 
 	/**
+	 * @return \OC\Company\Manager
+	 */
+	public function getCompanyManager(){
+		return $this->get(ICompanyManager::class);
+	}
+
+	/**
 	 * @return \OC\User\Session
 	 * @deprecated 20.0.0
 	 */
