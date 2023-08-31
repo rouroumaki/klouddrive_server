@@ -690,12 +690,12 @@ const actions = {
 		})
 	},
 
-	addCompany({ commit, dispatch }, { companyId, password, displayName,adminUser,adminDisplayname,adminPassword }) {
+	addCompany({ commit, dispatch }, { companyId, displayName,adminUser,adminDisplayname,adminPassword }) {
 		return api.requireAdmin().then((response) => {
-			return api.post(generateOcsUrl(`cloud/companies?companyid=${companyId}&displayname=${displayName}&pwd=${password}`))
+			return api.post(generateOcsUrl(`cloud/companies?companyid=${companyId}&displayname=${displayName}&adminid=${adminUser}&adminname=${adminDisplayname}&adminpwd=${adminPassword}`))
 				.then((response) => {
 					dispatch('getCompanies', { offset: 0, limit: 25, search: '' })
-					dispatch('addCompanyAdmin',{companyId,adminUser,adminDisplayname,adminPassword})
+					// dispatch('addCompanyAdmin',{companyId,adminUser,adminDisplayname,adminPassword})
 				})
 				.catch((error) => { throw error })
 		}).catch((error) => {
@@ -705,7 +705,7 @@ const actions = {
 	},
 
 	async addCompanyAdmin({ commit, dispatch }, { companyId, adminUser, adminDisplayname, adminPassword }) {
-		await dispatch('addUser', { userid: adminUser, displayName: adminDisplayname, password: adminPassword })
+		await dispatch('addUser', { userid: adminUser, displayName: adminDisplayname, password: adminPassword,companyId })
 		return api.post(generateOcsUrl(`cloud/users/{userId}/companyadmins?companyid=${companyId}`,{userId:adminUser}))
 	},
 

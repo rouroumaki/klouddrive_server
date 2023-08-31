@@ -51,25 +51,6 @@
 				autocomplete="off"
 				autocorrect="off"
 			/>
-			<NcPasswordField
-				ref="password"
-				class="modal__item"
-				data-test="password"
-				:value.sync="newUser.password"
-				:minlength="minPasswordLength"
-				:maxlength="469"
-				aria-describedby="password-email-hint"
-				:label="
-					newUser.mailAddress === ''
-						? t('settings', 'Password (required)')
-						: t('settings', 'Password')
-				"
-				:label-visible="true"
-				autocapitalize="none"
-				autocomplete="new-password"
-				autocorrect="off"
-				:required="newUser.mailAddress === ''"
-			/>
 			<div class="modal__item">
 				<label class="modal__label" for="new-user-quota">
 					{{ t("settings", "Quota") }}
@@ -257,7 +238,6 @@ export default {
 			try {
 				await this.$store.dispatch("addCompany", {
 					companyId: this.newUser.id,
-					password: this.newUser.password,
 					displayName: this.newUser.displayName,
 					email: this.newUser.mailAddress,
 					language: this.newUser.language.code,

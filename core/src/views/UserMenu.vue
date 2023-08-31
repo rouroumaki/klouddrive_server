@@ -72,21 +72,27 @@ export default {
 	},
 
 	mounted() {
+		const index = this.settingsNavEntries.settings.href.lastIndexOf('/')
+		const prefix = this.settingsNavEntries.settings.href.slice(0, index+1)
 		axios.get(generateOcsUrl(`cloud/users/${this.userId}/companies`)).then(res => {
-			console.log(res.data.ocs.data);
+			if (res.data.ocs.data.companies.length) {
+			   this.$set(this.settingsNavEntries,'help',{
+					"type": "settings",
+					"id": "core_users",
+					"order": 99998,
+					"href": prefix + `users?companyId=${res.data.ocs.data.companies[0]}`,
+					"name": "公司成员",
+					"icon": "/apps/settings/img/users.svg",
+					"active": false,
+					"classes": "",
+					"unread": 0
+			   })
+			} else {
+			   this.$set(this.settingsNavEntries.core_users, 'name', '公司')
+			   this.$set(this.settingsNavEntries.core_users, 'href', prefix+'companies')
+			}
 		})
-		// fetch().then(res => res.json()).then(res => {
-		// 	console.log(res);
-		// 	debugger
-		// }).catch(err => {
-		// 	console.log(err)
-		// })
-		this.$set(this.settingsNavEntries.core_users, 'name', '公司')
-		if (this.settingsNavEntries.core_users?.href) {
-			const index = this.settingsNavEntries.core_users.href.lastIndexOf('/')
-			const newHref = this.settingsNavEntries.core_users.href.slice(0, index+1) + 'companies'
-			this.$set(this.settingsNavEntries.core_users, 'href', newHref)
-		}
+	
 		// console.log(this.settingsNavEntries);
 		// debugger
 		emit('core:user-menu:mounted')
