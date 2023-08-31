@@ -199,6 +199,7 @@ use OCP\IAvatarManager;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\ICertificateManager;
+use OCP\ICompanyManager;
 use OCP\IBinaryFinder;
 use OCP\IDateTimeFormatter;
 use OCP\IDateTimeZone;

@@ -523,7 +523,7 @@ class ComposerStaticInit749170dad3f5e7f9ca158f5a9f04f6a2
         'OCP\\IConfig' => __DIR__ . '/../../..' . '/lib/public/IConfig.php',
         'OCP\\IContainer' => __DIR__ . '/../../..' . '/lib/public/IContainer.php',
         'OCP\\ICompany' => __DIR__ . '/../../..' . '/lib/public/ICompany.php',
-        'OCP\\IComapnyManager' => __DIR__ . '/../../..' . '/lib/public/ICompanyManager.php',
+        'OCP\\ICompanyManager' => __DIR__ . '/../../..' . '/lib/public/ICompanyManager.php',
         'OCP\\IDBConnection' => __DIR__ . '/../../..' . '/lib/public/IDBConnection.php',
         'OCP\\IDateTimeFormatter' => __DIR__ . '/../../..' . '/lib/public/IDateTimeFormatter.php',
         'OCP\\IDateTimeZone' => __DIR__ . '/../../..' . '/lib/public/IDateTimeZone.php',
