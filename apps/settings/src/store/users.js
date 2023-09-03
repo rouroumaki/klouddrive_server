@@ -387,7 +387,7 @@ const actions = {
 				})
 		}
 		// generateOcsUrl('cloud/users/details?offset={offset}&limit={limit}&search={search}&companyId={companyId}', { offset, limit, search, companyId }
-		return api.get(generateOcsUrl(`cloud/companies/test2/users?offset={offset}&limit={limit}&search={search}`, { offset, limit, search, companyId }), {
+		return api.get(generateOcsUrl(`cloud/companies/${companyId}/users?offset={offset}&limit={limit}&search={search}`, { offset, limit, search, companyId }), {
 			cancelToken: searchRequestCancelSource.token,
 		})
 			.then((response) => {

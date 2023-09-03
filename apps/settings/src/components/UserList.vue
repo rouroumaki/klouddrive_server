@@ -266,11 +266,11 @@ export default {
 	},
 
 	async created() {
-		await this.loadUsers()
 	},
 
 	async mounted() {
 		this.companyId = this.$route.query.companyId
+		await this.loadUsers()
 		if (!this.settings.canChangePassword) {
 			OC.Notification.showTemporary(t('settings', 'Password change is disabled because the master key is disabled'))
 		}
