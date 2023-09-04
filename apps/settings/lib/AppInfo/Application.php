@@ -105,7 +105,7 @@ class Application extends App implements IBootstrap {
 			$isGroupAdmin = false;
 			if ($userObject !== null) {
 				$isCompanyAdmin = \OC::$server->getCompanyManager()->getSubAdmin()->isSubAdmin($userObject);
-				$isSubAdmin = \OC::$server->getGroupManager()->getSubAdmin()->isSubAdmin($userObject);
+				$isGroupAdmin = \OC::$server->getGroupManager()->getSubAdmin()->isSubAdmin($userObject);
 			}
 			return $isCompanyAdmin || $isGroupAdmin;
 		});

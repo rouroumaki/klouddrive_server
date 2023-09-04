@@ -83,7 +83,13 @@ class Application extends App implements IBootstrap {
 				$groupManager = $c->get(IGroupManager::class);
 				assert($groupManager instanceof GroupManager);
 				$isAdmin = $groupManager->isAdmin($user->getUID());
-				$isSubAdmin = $groupManager->getSubAdmin()->isSubAdmin($user);
+				$isGroupAdmin = $groupManager->getSubAdmin()->isSubAdmin($user);
+
+				$companyManager = $c->get(ICompanyManager::class);
+				assert($companyManager instanceof CompanyManager);
+				$isCompanyAdmin = $companyManager->getSubAdmin()->isSubAdmin($user);
+
+				$isSubAdmin = $isGroupAdmin || $isCompanyAdmin;
 			}
 
 			return new ProvisioningApiMiddleware(
