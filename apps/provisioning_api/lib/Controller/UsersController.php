@@ -388,103 +388,111 @@ class UsersController extends AUserData {
 		?string $manager = null,
 		?string $companyid = null,
 	): DataResponse {
-		$user = $this->userSession->getUser();
-		$isAdmin = $this->groupManager->isAdmin($user->getUID());
-		$subAdminManager = $this->groupManager->getSubAdmin();
-		$companyAdminManager = $this->companyManager->getSubAdmin();
-
-		if (empty($userid) && $this->config->getAppValue('core', 'newUser.generateUserID', 'no') === 'yes') {
-			$userid = $this->createNewUserId();
-		}
-
-		if ($this->userManager->userExists($userid)) {
-			$this->logger->error('Failed addUser attempt: User already exists.', ['app' => 'ocs_api']);
-			throw new OCSException($this->l10nFactory->get('provisioning_api')->t('User already exists'), 102);
-		}
-
-		if ($companyid !== null ){
-			if (!$this->companyManager->companyExists($companyid)){
-				throw new OCSException('company (' . $companyid . ') does not exist', 104);
-			}
-			if (!$isAdmin && !$companyAdminManager->isSubAdminOfCompany($user, $this->companyManager->get($companyid))){
-				throw new OCSException('insufficient privileges for company ' . $companyid, 105);
-			}
-		}
-		else{
-			if (!$isAdmin) {
-				throw new OCSException('no company specified (required for company admins)', 106);
-			}
-		}
-
-		/*
-		if ($groups !== []) {
-			foreach ($groups as $group) {
-				if (!$this->groupManager->groupExists($group)) {
-					throw new OCSException('group ' . $group . ' does not exist', 104);
-				}
-				if (!$isAdmin && !$subAdminManager->isSubAdminOfGroup($user, $this->groupManager->get($group))) {
-					throw new OCSException('insufficient privileges for group ' . $group, 105);
-				}
-			}
-		} else {
-			if (!$isAdmin) {
-				throw new OCSException('no group specified (required for subadmins)', 106);
-			}
-		}
-		
-
-		$subadminGroups = [];
-		if ($subadmin !== []) {
-			foreach ($subadmin as $groupid) {
-				$group = $this->groupManager->get($groupid);
-				// Check if group exists
-				if ($group === null) {
-					throw new OCSException('Subadmin group does not exist', 102);
-				}
-				// Check if trying to make subadmin of admin group
-				if ($group->getGID() === 'admin') {
-					throw new OCSException('Cannot create subadmins for admin group', 103);
-				}
-				// Check if has permission to promote subadmins
-				if (!$subAdminManager->isSubAdminOfGroup($user, $group) && !$isAdmin) {
-					throw new OCSForbiddenException('No permissions to promote subadmins');
-				}
-				$subadminGroups[] = $group;
-			}
-		}
-		*/
-
-		$generatePasswordResetToken = false;
-		if (strlen($password) > IUserManager::MAX_PASSWORD_LENGTH) {
-			throw new OCSException('Invalid password value', 101);
-		}
-		if ($password === '') {
-			if ($email === '') {
-				throw new OCSException('To send a password link to the user an email address is required.', 108);
-			}
-
-			$passwordEvent = new GenerateSecurePasswordEvent();
-			$this->eventDispatcher->dispatchTyped($passwordEvent);
-
-			$password = $passwordEvent->getPassword();
-			if ($password === null) {
-				// Fallback: ensure to pass password_policy in any case
-				$password = $this->secureRandom->generate(10)
-					. $this->secureRandom->generate(1, ISecureRandom::CHAR_UPPER)
-					. $this->secureRandom->generate(1, ISecureRandom::CHAR_LOWER)
-					. $this->secureRandom->generate(1, ISecureRandom::CHAR_DIGITS)
-					. $this->secureRandom->generate(1, ISecureRandom::CHAR_SYMBOLS);
-			}
-			$generatePasswordResetToken = true;
-		}
-
-		if ($email === '' && $this->config->getAppValue('core', 'newUser.requireEmail', 'no') === 'yes') {
-			throw new OCSException('Required email address was not provided', 110);
-		}
-
 		try {
+			$user = $this->userSession->getUser();
+			$isAdmin = $this->groupManager->isAdmin($user->getUID());
+			$subAdminManager = $this->groupManager->getSubAdmin();
+			$companyAdminManager = $this->companyManager->getSubAdmin();
+
+			if (empty($userid) && $this->config->getAppValue('core', 'newUser.generateUserID', 'no') === 'yes') {
+				$userid = $this->createNewUserId();
+			}
+
+			if ($this->userManager->userExists($userid)) {
+				$this->logger->error('Failed addUser attempt: User already exists.', ['app' => 'ocs_api']);
+				throw new OCSException($this->l10nFactory->get('provisioning_api')->t('User already exists'), 102);
+			}
+
+			if ($companyid !== null ){
+				if (!$this->companyManager->companyExists($companyid)){
+					throw new OCSException('company (' . $companyid . ') does not exist', 104);
+				}
+				if (!$isAdmin && !$companyAdminManager->isSubAdminOfCompany($user, $this->companyManager->get($companyid))){
+					throw new OCSException('insufficient privileges for company ' . $companyid, 105);
+				}
+			}
+			else{
+				if (!$isAdmin) {
+					throw new OCSException('no company specified (required for company admins)', 106);
+				}
+			}
+
+			/*
+			if ($groups !== []) {
+				foreach ($groups as $group) {
+					if (!$this->groupManager->groupExists($group)) {
+						throw new OCSException('group ' . $group . ' does not exist', 104);
+					}
+					if (!$isAdmin && !$subAdminManager->isSubAdminOfGroup($user, $this->groupManager->get($group))) {
+						throw new OCSException('insufficient privileges for group ' . $group, 105);
+					}
+				}
+			} else {
+				if (!$isAdmin) {
+					throw new OCSException('no group specified (required for subadmins)', 106);
+				}
+			}
+			
+
+			$subadminGroups = [];
+			if ($subadmin !== []) {
+				foreach ($subadmin as $groupid) {
+					$group = $this->groupManager->get($groupid);
+					// Check if group exists
+					if ($group === null) {
+						throw new OCSException('Subadmin group does not exist', 102);
+					}
+					// Check if trying to make subadmin of admin group
+					if ($group->getGID() === 'admin') {
+						throw new OCSException('Cannot create subadmins for admin group', 103);
+					}
+					// Check if has permission to promote subadmins
+					if (!$subAdminManager->isSubAdminOfGroup($user, $group) && !$isAdmin) {
+						throw new OCSForbiddenException('No permissions to promote subadmins');
+					}
+					$subadminGroups[] = $group;
+				}
+			}
+			*/
+
+			$generatePasswordResetToken = false;
+			if (strlen($password) > IUserManager::MAX_PASSWORD_LENGTH) {
+				throw new OCSException('Invalid password value', 101);
+			}
+			if ($password === '') {
+				if ($email === '') {
+					throw new OCSException('To send a password link to the user an email address is required.', 108);
+				}
+
+				$passwordEvent = new GenerateSecurePasswordEvent();
+				$this->eventDispatcher->dispatchTyped($passwordEvent);
+
+				$password = $passwordEvent->getPassword();
+				if ($password === null) {
+					// Fallback: ensure to pass password_policy in any case
+					$password = $this->secureRandom->generate(10)
+						. $this->secureRandom->generate(1, ISecureRandom::CHAR_UPPER)
+						. $this->secureRandom->generate(1, ISecureRandom::CHAR_LOWER)
+						. $this->secureRandom->generate(1, ISecureRandom::CHAR_DIGITS)
+						. $this->secureRandom->generate(1, ISecureRandom::CHAR_SYMBOLS);
+				}
+				$generatePasswordResetToken = true;
+			}
+
+			if ($email === '' && $this->config->getAppValue('core', 'newUser.requireEmail', 'no') === 'yes') {
+				throw new OCSException('Required email address was not provided', 110);
+			}
+
+		
 			$newUser = $this->userManager->createUser($userid, $password);
 			$this->logger->info('Successful addUser call with userid: ' . $userid, ['app' => 'ocs_api']);
+
+			if ($companyid !== null){
+				$company = $this->companyManager->get($companyid);
+				if ($company !== null){
+					$company->addUser($newUser);
+				}
+			}
 
 			/*
 			foreach ($groups as $group) {
@@ -524,12 +532,6 @@ class UsersController extends AUserData {
 				$this->editUser($userid, self::USER_FIELD_MANAGER, $manager);
 			}
 
-			if ($companyid !== null){
-				$company = $this->companyManager->get($companyid);
-				if ($company !== null){
-					$company->addUser($newUser);
-				}
-			}
 
 			// Send new user mail only if a mail is set
 			if ($email !== '') {
@@ -911,8 +913,10 @@ class UsersController extends AUserData {
 		} else {
 			// Check if admin / subadmin
 			$subAdminManager = $this->groupManager->getSubAdmin();
+			$companyAdminManager = $this->companyManager->getSubAdmin();
 			if (
 				$this->groupManager->isAdmin($currentLoggedInUser->getUID())
+				|| $companyAdminManager->isUserAccessible($currentLoggedInUser, $targetUser)
 				|| $subAdminManager->isUserAccessible($currentLoggedInUser, $targetUser)
 			) {
 				// They have permissions over the user
