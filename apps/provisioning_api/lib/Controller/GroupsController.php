@@ -44,6 +44,7 @@ use OCP\AppFramework\OCSController;
 use OCP\IConfig;
 use OCP\IGroup;
 use OCP\IGroupManager;
+use OCP\ICompanyManager;
 use OCP\IRequest;
 use OCP\IUser;
 use OCP\IUserManager;
@@ -65,6 +66,7 @@ class GroupsController extends AUserData {
 								IUserManager $userManager,
 								IConfig $config,
 								IGroupManager $groupManager,
+								ICompanyManager $companyManager,
 								IUserSession $userSession,
 								IAccountManager $accountManager,
 								IFactory $l10nFactory,
@@ -74,6 +76,7 @@ class GroupsController extends AUserData {
 			$userManager,
 			$config,
 			$groupManager,
+			$companyManager,
 			$userSession,
 			$accountManager,
 			$l10nFactory

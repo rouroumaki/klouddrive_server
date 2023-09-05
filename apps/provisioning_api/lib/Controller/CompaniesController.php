@@ -24,8 +24,6 @@ use OCP\L10N\IFactory;
 use Psr\Log\LoggerInterface;
 
 class CompaniesController extends AUserData {
-	/** @var \OC\Company\Manager */
-    private $companyManager;
     private $logger;
 
     public function __construct(string $appName,
@@ -38,9 +36,8 @@ class CompaniesController extends AUserData {
                                 IFactory $l10nFactory,
                                 ICompanyManager $companyManager,
                                 LoggerInterface $logger ){
-        parent::__construct($appName, $request, $userManager, $config, $groupManager, $userSession, $accountManager, $l10nFactory);
+        parent::__construct($appName, $request, $userManager, $config, $groupManager, $companyManager, $userSession, $accountManager, $l10nFactory);
 
-        $this->companyManager = $companyManager;
         $this->logger = $logger;
     }
 

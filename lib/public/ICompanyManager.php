@@ -22,7 +22,7 @@ interface ICompanyManager {
 
 	public function getUserCompanyIds(IUser $user): array;
 
-	public function displayNamesInGroup($cid, $search = '', $limit = -1, $offset = 0);
+	public function displayNamesInCompany($cid, $search = '', $limit = -1, $offset = 0);
 
 	public function isInCompany($userId, $company);
 

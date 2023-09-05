@@ -212,7 +212,7 @@ class Manager extends PublicEmitter implements ICompanyManager {
 		}, $this->getUserCompanies($user));
 	}
 
-	public function displayNamesInGroup($cid, $search = '', $limit = -1, $offset = 0) {
+	public function displayNamesInCompany($cid, $search = '', $limit = -1, $offset = 0) {
 		$company = $this->get($cid);
 		if (is_null($company)) {
 			return [];

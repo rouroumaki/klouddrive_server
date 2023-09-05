@@ -99,8 +99,6 @@ class UsersController extends AUserData {
 	private $knownUserService;
 	/** @var IEventDispatcher */
 	private $eventDispatcher;
-	/** @var ICompanyManager */
-	private $companyManager;
 
 	public function __construct(
 		string $appName,
@@ -126,6 +124,7 @@ class UsersController extends AUserData {
 			$userManager,
 			$config,
 			$groupManager,
+			$companyManager,
 			$userSession,
 			$accountManager,
 			$l10nFactory
@@ -139,7 +138,7 @@ class UsersController extends AUserData {
 		$this->remoteWipe = $remoteWipe;
 		$this->knownUserService = $knownUserService;
 		$this->eventDispatcher = $eventDispatcher;
-		$this->companyManager = $companyManager;
+		
 	}
 
 	/**
@@ -160,17 +159,32 @@ class UsersController extends AUserData {
 		// Admin? Or SubAdmin?
 		$uid = $user->getUID();
 		$subAdminManager = $this->groupManager->getSubAdmin();
+		$companyAdminManager = $this->companyManager->getSubAdmin();
 		if ($this->groupManager->isAdmin($uid)) {
 			$users = $this->userManager->search($search, $limit, $offset);
-		} elseif ($subAdminManager->isSubAdmin($user)) {
-			$subAdminOfGroups = $subAdminManager->getSubAdminsGroups($user);
-			foreach ($subAdminOfGroups as $key => $group) {
-				$subAdminOfGroups[$key] = $group->getGID();
+		}
+		else{
+			$users = [];
+			if ($companyAdminManager->isSubAdmin($user)){
+				$subAdminOfCompanies = $companyAdminManager->getSubAdminsCompanies($user);
+				foreach ($subAdminOfCompanies as $key => $company) {
+					$subAdminOfCompanies[$key] = $company->getCID();
+				}			
+
+				foreach ($subAdminOfCompanies as $company) {
+					$users = array_merge($users, $this->companyManager->displayNamesInCompany($company, $search, $limit, $offset));
+				}			
 			}
 
-			$users = [];
-			foreach ($subAdminOfGroups as $group) {
-				$users = array_merge($users, $this->groupManager->displayNamesInGroup($group, $search, $limit, $offset));
+			if ($subAdminManager->isSubAdmin($user)) {
+				$subAdminOfGroups = $subAdminManager->getSubAdminsGroups($user);
+				foreach ($subAdminOfGroups as $key => $group) {
+					$subAdminOfGroups[$key] = $group->getGID();
+				}
+
+				foreach ($subAdminOfGroups as $group) {
+					$users = array_merge($users, $this->groupManager->displayNamesInGroup($group, $search, $limit, $offset));
+				}
 			}
 		}
 
@@ -377,6 +391,7 @@ class UsersController extends AUserData {
 		$user = $this->userSession->getUser();
 		$isAdmin = $this->groupManager->isAdmin($user->getUID());
 		$subAdminManager = $this->groupManager->getSubAdmin();
+		$companyAdminManager = $this->companyManager->getSubAdmin();
 
 		if (empty($userid) && $this->config->getAppValue('core', 'newUser.generateUserID', 'no') === 'yes') {
 			$userid = $this->createNewUserId();
@@ -387,6 +402,21 @@ class UsersController extends AUserData {
 			throw new OCSException($this->l10nFactory->get('provisioning_api')->t('User already exists'), 102);
 		}
 
+		if ($companyid !== null ){
+			if (!$this->companyManager->companyExists($companyid)){
+				throw new OCSException('company (' . $companyid . ') does not exist', 104);
+			}
+			if (!$isAdmin && !$companyAdminManager->isSubAdminOfCompany($user, $this->companyManager->get($companyid))){
+				throw new OCSException('insufficient privileges for company ' . $companyid, 105);
+			}
+		}
+		else{
+			if (!$isAdmin) {
+				throw new OCSException('no company specified (required for company admins)', 106);
+			}
+		}
+
+		/*
 		if ($groups !== []) {
 			foreach ($groups as $group) {
 				if (!$this->groupManager->groupExists($group)) {
@@ -401,6 +431,7 @@ class UsersController extends AUserData {
 				throw new OCSException('no group specified (required for subadmins)', 106);
 			}
 		}
+		
 
 		$subadminGroups = [];
 		if ($subadmin !== []) {
@@ -421,6 +452,7 @@ class UsersController extends AUserData {
 				$subadminGroups[] = $group;
 			}
 		}
+		*/
 
 		$generatePasswordResetToken = false;
 		if (strlen($password) > IUserManager::MAX_PASSWORD_LENGTH) {
@@ -454,6 +486,7 @@ class UsersController extends AUserData {
 			$newUser = $this->userManager->createUser($userid, $password);
 			$this->logger->info('Successful addUser call with userid: ' . $userid, ['app' => 'ocs_api']);
 
+			/*
 			foreach ($groups as $group) {
 				$this->groupManager->get($group)->addUser($newUser);
 				$this->logger->info('Added userid ' . $userid . ' to group ' . $group, ['app' => 'ocs_api']);
@@ -461,6 +494,7 @@ class UsersController extends AUserData {
 			foreach ($subadminGroups as $group) {
 				$subAdminManager->createSubAdmin($newUser, $group);
 			}
+			*/
 
 			if ($displayName !== '') {
 				try {

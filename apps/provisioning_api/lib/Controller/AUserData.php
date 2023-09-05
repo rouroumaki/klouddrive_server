@@ -32,7 +32,6 @@ declare(strict_types=1);
  */
 namespace OCA\Provisioning_API\Controller;
 
-use OC\Group\Manager;
 use OC\User\Backend;
 use OC\User\NoUserException;
 use OC_Helper;
@@ -45,6 +44,7 @@ use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
 use OCP\Files\NotFoundException;
 use OCP\IConfig;
+use OCP\ICompanyManager;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUserManager;
@@ -70,9 +70,11 @@ abstract class AUserData extends OCSController {
 
 	/** @var IUserManager */
 	protected $userManager;
+	/** @var \OC\Company\Manager */
+	protected $companyManager;
 	/** @var IConfig */
 	protected $config;
-	/** @var Manager */
+	/** @var \OC\Group\Manager */
 	protected $groupManager;
 	/** @var IUserSession */
 	protected $userSession;
@@ -86,6 +88,7 @@ abstract class AUserData extends OCSController {
 								IUserManager $userManager,
 								IConfig $config,
 								IGroupManager $groupManager,
+								ICompanyManager $companyManager,
 								IUserSession $userSession,
 								IAccountManager $accountManager,
 								IFactory $l10nFactory) {
@@ -94,6 +97,7 @@ abstract class AUserData extends OCSController {
 		$this->userManager = $userManager;
 		$this->config = $config;
 		$this->groupManager = $groupManager;
+		$this->companyManager = $companyManager;
 		$this->userSession = $userSession;
 		$this->accountManager = $accountManager;
 		$this->l10nFactory = $l10nFactory;
@@ -122,8 +126,14 @@ abstract class AUserData extends OCSController {
 		}
 
 		$isAdmin = $this->groupManager->isAdmin($currentLoggedInUser->getUID());
+		$companyAdminManager = $this->companyManager->getSubAdmin();
+		$groupAdminManager = $this->groupManager->getSubAdmin();
+
+
+
 		if ($isAdmin
-			|| $this->groupManager->getSubAdmin()->isUserAccessible($currentLoggedInUser, $targetUserObject)) {
+			|| $companyAdminManager->isUserAccessible($currentLoggedInUser, $targetUserObject)
+			|| $groupAdminManager->isUserAccessible($currentLoggedInUser, $targetUserObject)) {
 			$data['enabled'] = $this->config->getUserValue($targetUserObject->getUID(), 'core', 'enabled', 'true') === 'true';
 		} else {
 			// Check they are looking up themselves
@@ -131,6 +141,14 @@ abstract class AUserData extends OCSController {
 				return null;
 			}
 		}
+
+		//get companies data
+		$cids = [];
+		$companies = $this->companyManager->getUserCompanies($targetUserObject);
+		foreach($companies as $company){
+			$cids[] = $company->getCID();
+		}
+
 
 		// Get groups data
 		$userAccount = $this->accountManager->getAccount($targetUserObject);
@@ -156,6 +174,7 @@ abstract class AUserData extends OCSController {
 		$data['lastLogin'] = $targetUserObject->getLastLogin() * 1000;
 		$data['backend'] = $targetUserObject->getBackendClassName();
 		$data['subadmin'] = $this->getUserSubAdminGroupsData($targetUserObject->getUID());
+		$data['companyadmin'] = $this->getUserSubAdminCompaniesData($targetUserObject->getUID());
 		$data[self::USER_FIELD_QUOTA] = $this->fillStorageInfo($targetUserObject->getUID());
 		$managerUids = $targetUserObject->getManagerUids();
 		$data[self::USER_FIELD_MANAGER] = empty($managerUids) ? '' : $managerUids[0];
@@ -213,6 +232,7 @@ abstract class AUserData extends OCSController {
 		}
 
 		$data['groups'] = $gids;
+		$data['companies'] = $cids;
 		$data[self::USER_FIELD_LANGUAGE] = $this->l10nFactory->getUserLanguage($targetUserObject);
 		$data[self::USER_FIELD_LOCALE] = $this->config->getUserValue($targetUserObject->getUID(), 'core', 'locale');
 		$data[self::USER_FIELD_NOTIFICATION_EMAIL] = $targetUserObject->getPrimaryEMailAddress();
@@ -248,6 +268,22 @@ abstract class AUserData extends OCSController {
 		}
 
 		return $groups;
+	}
+
+	protected function getUserSubAdminCompaniesData(string $userId): array{
+		$user = $this->userManager->get($userId);
+		// Check if the user exists
+		if ($user === null) {
+			throw new OCSNotFoundException('User does not exist');
+		}
+
+		$subAdminCompanies = $this->companyManager->getSubAdmin()->getSubAdminsCompanies($user);
+		$companies = [];
+		foreach ($subAdminCompanies as $key => $company) {
+			$companies[] = $company->getCID();
+		}
+
+		return $companies;
 	}
 
 	/**
