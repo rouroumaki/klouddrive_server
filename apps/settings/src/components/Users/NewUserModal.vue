@@ -80,12 +80,12 @@
 				:required="newUser.password === '' || settings.newUserRequireEmail" />
 			<div class="modal__item">
 				<!-- hidden input trick for vanilla html5 form validation -->
-				<NcTextField v-if="!settings.isAdmin"
+				<!-- <NcTextField v-if="!settings.isAdmin"
 					id="new-user-groups-input"
 					tabindex="-1"
 					:class="{ 'icon-loading-small': loading.groups }"
 					:value="newUser.groups"
-					:required="!settings.isAdmin" />
+					:required="!settings.isAdmin" /> -->
 				<label class="modal__label"
 					for="new-user-groups">
 					{{ !settings.isAdmin ? t('settings', 'Groups (required)') : t('settings', 'Groups') }}
@@ -211,7 +211,7 @@ export default {
 		},
 
 		companyId: {
-			type: Number,
+			type: String,
 			required: true
 		}
 	},
